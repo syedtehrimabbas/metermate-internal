@@ -1,12 +1,19 @@
 import React from 'react';
-import {Image, ImageBackground, Pressable, StyleSheet, Text, View} from 'react-native';
+import {
+  Image,
+  ImageBackground,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import {AppImages} from '../../../images';
 import colors from '../../../theme/colors.js';
 import {AppFonts} from '../../../fonts';
 import {scaledFontWidth} from '../../../utils/AppUtils.js';
 import SearchBar from '../../../components/searchbar';
 import {useDispatch} from 'react-redux';
-import {updateUser} from '../../../redux';
+import {clearUser} from '../../../redux';
 import MyProfileScreen from '../../profile/MyProfile.tsx';
 
 type Props = {
@@ -25,7 +32,7 @@ const SearchScreen = ({navigation}: Props) => {
                 <Image style={styles.icon} resizeMode="cover" source={AppImages.user_placeholder}/>
             </Pressable>
             <Pressable style={[styles.frameParent, styles.parentFlexBox]} onPress={() => {
-                dispatch(updateUser(false)); // User is authenticated
+                dispatch(clearUser()); // User is authenticated
             }}>
                 <View style={[styles.logIn04Parent, styles.parentFlexBox]}>
                     <Image style={styles.logIn04Icon} resizeMode="cover" source={AppImages.logout}/>

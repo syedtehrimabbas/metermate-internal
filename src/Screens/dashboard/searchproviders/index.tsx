@@ -87,7 +87,9 @@ const SearchElectricProviders = ({ navigation }) => {
 
     const renderProvider = ({ item }) => (
         <TouchableOpacity>
-            <View style={styles.providerCard}>
+            <TouchableOpacity style={styles.providerCard}
+                onPress={() => navigation.navigate('ProviderDetailsScreen', { provider: item })}>
+
                 <View style={{
                     flexDirection: 'row',
                     alignItems: 'center',
@@ -113,7 +115,7 @@ const SearchElectricProviders = ({ navigation }) => {
                 </View>
 
                 {/* Row Two */}
-                {/* 
+                {/*
                 <View style={{ flexDirection: 'row', flex: 2, marginTop: 10 }}>
                     <View style={{ flex: 1 }}>
                         <Text style={styles.providerAbout}>{'Program Availability:'}</Text>
@@ -126,7 +128,7 @@ const SearchElectricProviders = ({ navigation }) => {
                     </View>
                 </View> */}
 
-            </View>
+            </TouchableOpacity>
         </TouchableOpacity>
     );
 

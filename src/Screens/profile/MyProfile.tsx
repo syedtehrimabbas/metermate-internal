@@ -8,7 +8,7 @@ import {AppFonts} from '../../fonts';
 import {hp, wp} from '../../utils/Dimension.js';
 import {AppButton} from '../../components/AppButton.js';
 import EditProfileScreen from './edit_profile';
-import {updateUser} from '../../redux';
+import {clearUser} from '../../redux';
 
 type Props = {
     navigation: any;
@@ -63,7 +63,7 @@ const MyProfileScreen = ({navigation}: Props) => {
         </View>
         <AppButton
             onPress={() => {
-                dispatch(updateUser(false)); // User is authenticated
+                dispatch(clearUser());
             }}
             width={wp(90)}
             height={50}

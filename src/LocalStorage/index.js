@@ -1,39 +1,43 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-class AppLocalStorage {
-    componentDidMount() {
-        this._StoreData.done();
-        this._GetStoredData().done();
-        this._RemoveStoredData.done();
+class MeterMateEncryptedStorage {
+  static USER_KEY = 'user';
+  static JWT_KEY = 'jwt';
+
+  static async setItem(key, value) {
+    try {
+      const jsonValue = JSON.stringify(value);
+      await AsyncStorage.setItem(key, jsonValue);
+    } catch (error) {
+      console.error(`Error saving data for key "${key}":`, error);
     }
+  }
 
-    _StoreData = async (key, value) => {
-        const data = JSON.stringify(value);
-        try {
-            await AsyncStorage.setItem(key, data);
-        } catch (error) {
-            console.log(error.message);
-        }
-    };
+  static async getItem(key) {
+    try {
+      const jsonValue = await AsyncStorage.getItem(key);
+      return jsonValue != null ? JSON.parse(jsonValue) : null;
+    } catch (error) {
+      console.error(`Error retrieving data for key "${key}":`, error);
+      return null;
+    }
+  }
 
-    _GetStoredData = async key => {
-        let retrievedData;
-        try {
-            retrievedData = await AsyncStorage.getItem(key);
-            return JSON.parse(retrievedData);
-        } catch (error) {
-            console.log(error.message);
-        }
-        return JSON.parse(retrievedData);
-    };
+  static async removeItem(key) {
+    try {
+      await AsyncStorage.removeItem(key);
+    } catch (error) {
+      console.error(`Error removing data for key "${key}":`, error);
+    }
+  }
 
-    _RemoveStoredData = async key => {
-        try {
-            await AsyncStorage.removeItem(key);
-        } catch (error) {
-            console.log(error.message);
-        }
-    };
+  static async clearAll() {
+    try {
+      await AsyncStorage.clear();
+    } catch (error) {
+      console.error('Error clearing AsyncStorage:', error);
+    }
+  }
 }
 
-export const Preferences = new AppLocalStorage();
+export default MeterMateEncryptedStorage;

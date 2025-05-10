@@ -1,42 +1,61 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {AppStack, AuthenticationStack, SplashStack} from '..';
 import {useSelector} from 'react-redux';
 import {headerOptions, navigatorOptions} from '../config';
-import {Preferences} from '../../LocalStorage';
-import PreferencesKeys from '../../LocalStorage/PreferencesKeys.js';
+import MeterMateEncryptedStorage from '../../LocalStorage';
 
 type Props = {};
 const RootNav = createNativeStackNavigator();
 const RootNavigation = (props: Props) => {
-    const [isSplash, setSplash] = React.useState(true);
-    const {isAuthenticated} = useSelector((state: any) => state.userInfo);
-    React.useEffect(() => {
-        setTimeout(() => {
-            Preferences._GetStoredData(PreferencesKeys.USER).then(data => {
-                console.log('_GetStoredData', data);
-                if (data !== null) {
-                } else {
-                }
-            });
-            setSplash(false);
-        }, 3000);
-    }, []);
+  const [isSplash, setSplash] = React.useState(true);
+  const [userDetails, setUserDetails] = useState(null);
+  const {userObject} = useSelector((state: any) => state.userInfo);
+  useEffect(() => {
+    setUserDetails(userObject);
+  }, [userObject]);
 
-    return (
-        <NavigationContainer>
-            <RootNav.Navigator screenOptions={navigatorOptions}>
-                {Object.entries({
-                    ...(isSplash ? SplashStack : isAuthenticated ? AppStack : AuthenticationStack),
-                }).map(([name, component]) => {
-                    return (
-                        <RootNav.Screen key={name} name={name} component={component} options={headerOptions}/>
-                    );
-                })}
-            </RootNav.Navigator>
-        </NavigationContainer>
-    );
+  React.useEffect(() => {
+    setTimeout(() => {
+      setSplash(false);
+      MeterMateEncryptedStorage.getItem(MeterMateEncryptedStorage.USER_KEY)
+        .then(user => {
+          if (user) {
+            const jsonUser = JSON.parse(user);
+            setUserDetails(jsonUser);
+          } else {
+            console.log('No user data found.');
+          }
+        })
+        .catch(error => {
+          console.error('Error retrieving user data:', error);
+        });
+    }, 3000);
+  }, []);
+
+  return (
+    <NavigationContainer>
+      <RootNav.Navigator screenOptions={navigatorOptions}>
+        {Object.entries({
+          ...(isSplash
+            ? SplashStack
+            : userDetails && userDetails.access_token !== ''
+            ? AppStack
+            : AuthenticationStack),
+        }).map(([name, component]) => {
+          return (
+            <RootNav.Screen
+              key={name}
+              name={name}
+              component={component}
+              options={headerOptions}
+            />
+          );
+        })}
+      </RootNav.Navigator>
+    </NavigationContainer>
+  );
 };
 
 export {RootNavigation};
