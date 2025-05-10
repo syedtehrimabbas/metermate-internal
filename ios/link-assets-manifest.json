@@ -1,0 +1,29 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "assets/fonts/General Sans.ttf",
+      "sha1": "e62ab33e17846da87b46ac2a3b155a7307f35fb8"
+    },
+    {
+      "path": "assets/fonts/GeneralSans-Regular.otf",
+      "sha1": "b03745ee5c7610ffcd8b64a4a4ccf28e25ed9759"
+    },
+    {
+      "path": "assets/fonts/GeneralSans-VariableItalic.ttf",
+      "sha1": "f3d62b45179570481bf8c87eae0c917f16f2cb78"
+    },
+    {
+      "path": "assets/fonts/Inter-Italic.ttf",
+      "sha1": "81cca19cd01dbcfea3826e02cc1491ff7423c2b1"
+    },
+    {
+      "path": "assets/fonts/Inter-Regular.ttf",
+      "sha1": "ee5c2e22ffeddefc433c9aa4c76779bb73a5c682"
+    },
+    {
+      "path": "assets/fonts/Inter-SemiBold.ttf",
+      "sha1": "f3e44abd6661d5b861e66db22f4f79a6c466cd00"
+    }
+  ]
+}
