@@ -1,32 +1,33 @@
-import React, {useRef, useState} from 'react';
-import {Alert, Image, StyleSheet, Text, View} from 'react-native';
+import React, { useRef, useState } from 'react';
+import { Alert, Image, StyleSheet, Text, View } from 'react-native';
 import colors from '../../theme/colors';
-import {AppFonts} from '../../fonts';
-import {AppImages} from '../../images';
-import {AppInput} from '../../components/AppInput.js';
-import {getScaledHeight, scaledFontWidth} from '../../utils/AppUtils.js';
-import {AppButton} from '../../components/AppButton.js';
-import {wp} from '../../utils/Dimension.js';
-import {useDispatch} from 'react-redux';
-import {updateUser} from '../../redux';
-import {supabase} from '../../utils/supabase.ts';
+import { AppFonts } from '../../fonts';
+import { AppImages } from '../../images';
+import { AppInput } from '../../components/AppInput.js';
+import { getScaledHeight, scaledFontWidth } from '../../utils/AppUtils.js';
+import { AppButton } from '../../components/AppButton.js';
+import { wp } from '../../utils/Dimension.js';
+import { useDispatch } from 'react-redux';
+import { updateUser } from '../../redux';
+import { supabase } from '../../utils/supabase.ts';
 import AppContainer from '../../components/AppContainer';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type Props = {
   navigation: any;
 };
-const LoginScreen = ({navigation}: Props) => {
+const LoginScreen = ({ navigation }: Props) => {
   const [email, Email] = useState('test@gmail.com');
   const [password, Password] = useState('Hello786@');
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{email?: string; password?: string}>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
   const emailInputRef = useRef(null);
   const passwordIRef = useRef(null);
   const dispatch = useDispatch();
 
   const validateForm = () => {
-    const newErrors: {email?: string; password?: string} = {};
+    const newErrors: { email?: string; password?: string } = {};
     let isValid = true;
 
     if (!email.trim()) {
@@ -60,17 +61,23 @@ const LoginScreen = ({navigation}: Props) => {
         email: email.trim(),
         password: password,
       })
-      .then(authResponse => {
-        const {data, error} = authResponse;
-        const {user, session} = data;
+      .then(async authResponse => {
+        const { data, error } = authResponse;
+        const { user, session } = data;
         if (error) {
-            console.log(error);
+          console.log(error);
           Alert.alert(
             error.name,
             error.message || 'An error occurred. Please try again.',
           );
         } else {
           dispatch(updateUser(session));
+          // Save user ID in AsyncStorage
+          try {
+            await AsyncStorage.setItem('user_data', JSON.stringify(user) || '');
+          } catch (e) {
+            console.log('Error saving user to AsyncStorage:', e);
+          }
         }
       })
       .catch(error => {
@@ -103,14 +110,14 @@ const LoginScreen = ({navigation}: Props) => {
           <Text style={styles.letsMakeEnergy}>
             Let's make energy management simple and efficient.
           </Text>
-          <View style={{width: '100%'}}>
+          <View style={{ width: '100%' }}>
             <AppInput
               ref={emailInputRef}
               placeholder={'Email'}
               onChangeText={text => {
                 Email(text);
                 if (errors.email) {
-                  setErrors(prev => ({...prev, email: undefined}));
+                  setErrors(prev => ({ ...prev, email: undefined }));
                 }
               }}
               value={email}
@@ -122,14 +129,14 @@ const LoginScreen = ({navigation}: Props) => {
               <Text style={styles.errorText}>{errors.email}</Text>
             )}
           </View>
-          <View style={{width: '100%'}}>
+          <View style={{ width: '100%' }}>
             <AppInput
               ref={passwordIRef}
               placeholder={'Password'}
               onChangeText={text => {
                 Password(text);
                 if (errors.password) {
-                  setErrors(prev => ({...prev, password: undefined}));
+                  setErrors(prev => ({ ...prev, password: undefined }));
                 }
               }}
               value={password}
@@ -174,7 +181,7 @@ const LoginScreen = ({navigation}: Props) => {
               style={styles.dontHaveAn}>
               {'Don’t have an account? '}{' '}
               <Text
-                style={{color: colors.black1, textDecorationLine: 'underline'}}>
+                style={{ color: colors.black1, textDecorationLine: 'underline' }}>
                 {'Signup'}
               </Text>
             </Text>

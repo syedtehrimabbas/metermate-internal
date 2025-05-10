@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, { useRef, useState } from 'react';
 import {
   Alert,
   Image,
@@ -10,19 +10,20 @@ import {
   View,
 } from 'react-native';
 import colors from '../../theme/colors';
-import {AppFonts} from '../../fonts';
-import {AppImages} from '../../images';
-import {AppInput} from '../../components/AppInput.js';
-import {scaledFontWidth} from '../../utils/AppUtils.js';
-import {AppButton} from '../../components/AppButton.js';
-import {wp} from '../../utils/Dimension.js';
-import {supabase} from '../../utils/supabase.ts';
+import { AppFonts } from '../../fonts';
+import { AppImages } from '../../images';
+import { AppInput } from '../../components/AppInput.js';
+import { scaledFontWidth } from '../../utils/AppUtils.js';
+import { AppButton } from '../../components/AppButton.js';
+import { wp } from '../../utils/Dimension.js';
+import { supabase } from '../../utils/supabase.ts';
 import AppContainer from '../../components/AppContainer';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type Props = {
   navigation: any;
 };
-const SignupScreen = ({navigation}: Props) => {
+const SignupScreen = ({ navigation }: Props) => {
   const [email, Email] = useState('');
   const [name, Name] = useState('');
   const [password, Password] = useState('');
@@ -78,7 +79,7 @@ const SignupScreen = ({navigation}: Props) => {
         password: password,
       })
       .then(response => {
-        const {user} = response.data;
+        const { user } = response.data;
         if (user) {
           storeUserData(user);
         }
@@ -94,7 +95,7 @@ const SignupScreen = ({navigation}: Props) => {
 
   const storeUserData = async user => {
     // Insert additional user data into the 'users' table
-    const {error: insertError} = await supabase.from('user_profiles').insert([
+    const { error: insertError } = await supabase.from('user_profiles').insert([
       {
         id: user.id,
         name: name,
@@ -108,6 +109,13 @@ const SignupScreen = ({navigation}: Props) => {
       Alert.alert('Error saving user data:', insertError.message);
     } else {
       // User data saved successfully
+      // Save user ID in AsyncStorage
+      try {
+        await AsyncStorage.setItem('user_data', JSON.stringify(user) || '');
+      } catch (e) {
+        console.log('Error saving user to AsyncStorage:', e);
+      }
+
       navigation.navigate('ChooseSubscriptionScreen');
     }
   };
@@ -142,9 +150,9 @@ const SignupScreen = ({navigation}: Props) => {
             {'Enter your details for sign up.'}
           </Text>
 
-          <View style={{alignSelf: 'center', marginVertical: 30}}>
+          <View style={{ alignSelf: 'center', marginVertical: 30 }}>
             <Image
-              style={{width: 100, height: 100, resizeMode: 'contain'}}
+              style={{ width: 100, height: 100, resizeMode: 'contain' }}
               source={AppImages.signup_image_ph}
             />
             <TouchableOpacity>
@@ -273,9 +281,9 @@ const SignupScreen = ({navigation}: Props) => {
                   textAlign: 'center',
                 }}>
                 {'I agree with'}
-                <Text style={{color: colors.black}}>{' Terms'}</Text>
+                <Text style={{ color: colors.black }}>{' Terms'}</Text>
                 <Text>{' and'}</Text>
-                <Text style={{color: colors.black}}>{' Privacy'}</Text>
+                <Text style={{ color: colors.black }}>{' Privacy'}</Text>
               </Text>
             </View>
 

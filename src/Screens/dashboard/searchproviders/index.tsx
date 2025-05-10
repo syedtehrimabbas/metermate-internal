@@ -7,6 +7,7 @@ import { getScaledHeight, scaledFontWidth } from '../../../utils/AppUtils.js';
 import { hp } from '../../../utils/Dimension.js';
 import { AppFonts } from '../../../fonts';
 import { supabase } from '../../../utils/supabase.ts';
+import { getUserId } from '../../../LocalStorage/index.js';
 
 const SearchElectricProviders = ({ navigation }) => {
     const [search, setSearch] = useState('');
@@ -16,6 +17,8 @@ const SearchElectricProviders = ({ navigation }) => {
     const [providers, setProviders] = useState([]);
     const [filteredProviders, setFilteredProviders] = useState([]);
     const dummyLogo = AppImages.dummy_company_logo_one; // Placeholder for logo path
+    const [lastSelectedZipcode, setLastSelectedZipcode] = useState(''); // State to store the last selected zipcode
+
     // Fetch zip codes from Supabase
     useEffect(() => {
         const fetchZipcodes = async () => {
@@ -59,14 +62,14 @@ const SearchElectricProviders = ({ navigation }) => {
             );
             setFilteredZipcodes(filtered);
 
-            const filteredProviders = providers.filter((provider) =>
-                filteredZipcodes.some((zipcode) => provider.uuid === zipcode.provider_uuid)
-            );
-            setFilteredProviders(filteredProviders);
+            // const filteredProviders = providers.filter((provider) =>
+            //     filteredZipcodes.some((zipcode) => provider.uuid === zipcode.provider_uuid)
+            // );
+            // setFilteredProviders(filteredProviders);
         }
     };
 
-    const handleZipcodeSelect = (zipcode) => {
+    const handleZipcodeSelect = async (zipcode) => {
         setSearch(zipcode.zipcode);
         setDropdownVisible(false);
 
@@ -75,6 +78,27 @@ const SearchElectricProviders = ({ navigation }) => {
             provider.uuid.includes(zipcode.provider_uuid)
         );
         setFilteredProviders(filtered);
+
+        // check if the selected zipcode is different from the last selected one
+        if (lastSelectedZipcode !== zipcode.zipcode) {
+            const userID = await getUserId();
+
+            // If different, store the selected zipcode in the lastSelectedZipcode variable and also add in supabase for history
+            const { error: insertError } = await supabase.from('zipcodes_history').insert([
+                {
+                    zipcode: zipcode.zipcode,
+                    results: filtered.length,
+                    user_id: userID,
+                },
+            ]);
+
+            if (insertError) {
+                console.error('Error saving zipcodes history:', insertError.message);
+            } 
+            setLastSelectedZipcode(zipcode.zipcode);
+        } else {
+            console.log('Selected zipcode is the same as the last one. No action taken.');
+        }
     };
 
     const clearSearch = () => {
