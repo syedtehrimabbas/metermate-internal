@@ -5,12 +5,15 @@ import {AppStack, AuthenticationStack, SplashStack} from '..';
 import {useSelector} from 'react-redux';
 import {headerOptions, navigatorOptions} from '../config';
 import MeterMateEncryptedStorage from '../../LocalStorage';
+import {updateUser} from '../../redux';
+import {useDispatch} from 'react-redux';
 
 type Props = {};
 const RootNav = createNativeStackNavigator();
 const RootNavigation = (props: Props) => {
   const [isSplash, setSplash] = React.useState(true);
   const [userDetails, setUserDetails] = useState(null);
+  const dispatch = useDispatch();
   const {userObject} = useSelector((state: any) => state.userInfo);
   useEffect(() => {
     setUserDetails(userObject);
@@ -24,6 +27,7 @@ const RootNavigation = (props: Props) => {
           if (user) {
             const jsonUser = JSON.parse(user);
             setUserDetails(jsonUser);
+            dispatch(updateUser(user));
           } else {
             console.log('No user data found.');
           }
