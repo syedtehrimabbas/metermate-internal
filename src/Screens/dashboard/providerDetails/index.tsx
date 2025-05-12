@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Image,
   ScrollView,
@@ -7,29 +7,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { getScaledHeight, scaledFontWidth } from '../../../utils/AppUtils';
-import { hp } from '../../../utils/Dimension';
-import { AppImages } from '../../../images';
+import {getScaledHeight, scaledFontWidth} from '../../../utils/AppUtils';
+import {hp} from '../../../utils/Dimension';
+import {AppImages} from '../../../images';
 import colors from '../../../theme/colors';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faChevronUp, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 
-type ProviderDetailsParams = {
-  ProviderDetails: {
-    provider: {
-      id: number;
-      name: string;
-      aboutShort: string;
-      buybackRate: string;
-      annualEarnings: string;
-      impact: string;
-      programAvailability: string;
-      logoPath: any;
-    };
-  };
-};
-
-const ProviderDetailsScreen = ({ route, navigation }) => {
+const ProviderDetailsScreen = ({route, navigation}) => {
   const [provider_name, set_provider_name] = useState('');
   const [provider_type, set_provider_type] = useState('');
   const [avg_electric_rate, set_avg_electric_rate] = useState(0);
@@ -51,24 +34,27 @@ const ProviderDetailsScreen = ({ route, navigation }) => {
           alignItems: 'center',
           marginBottom: 8,
         }}>
-        <Image style={{ width: 50, height: 50, marginEnd: 15 }} source={AppImages.dummy_company_logo_one} />
+        <Image
+          style={{width: 50, height: 50, marginEnd: 15}}
+          source={AppImages.dummy_company_logo_one}
+        />
         <View>
           <Text style={styles.providerName}>{provider_name}</Text>
           <Text style={styles.providerAbout}>{provider_type}</Text>
         </View>
       </View>
       {/* Row One */}
-      <View style={{ flexDirection: 'row', flex: 2, marginTop: 10 }}>
-        <View style={{ flex: 1 }}>
+      <View style={{flexDirection: 'row', flex: 2, marginTop: 10}}>
+        <View style={{flex: 1}}>
           <Text style={styles.providerAbout}>{'Average Electric Rate:'}</Text>
-          <Text style={[styles.providerName, { marginTop: 10 }]}>
+          <Text style={[styles.providerName, {marginTop: 10}]}>
             {avg_electric_rate}
           </Text>
         </View>
 
-        <View style={{ flex: 1 }}>
+        <View style={{flex: 1}}>
           <Text style={styles.providerAbout}>{'Offers Net Metering:'}</Text>
-          <Text style={[styles.providerName, { marginTop: 10 }]}>
+          <Text style={[styles.providerName, {marginTop: 10}]}>
             {offers_net_metering}
           </Text>
         </View>
@@ -104,7 +90,7 @@ const ProviderDetailsScreen = ({ route, navigation }) => {
     };
 
     // ✨ Utility: Parse `**bold**` text into parts
-    const parseBoldText = (text) => {
+    const parseBoldText = text => {
       const parts = text.split(/(\*\*[^*]+\*\*)/g); // split by **bold**
       return parts.map((part, index) => {
         if (part.startsWith('**') && part.endsWith('**')) {
@@ -123,30 +109,41 @@ const ProviderDetailsScreen = ({ route, navigation }) => {
       <View style={styles.section}>
         <View style={styles.headerRow}>
           <Text style={styles.sectionTitle}>Energy Rate Details</Text>
-          <TouchableOpacity onPress={() => setExpanded((prev) => !prev)}>
-            {expanded ? <FontAwesomeIcon icon={faChevronUp} size={20} color="#000" /> : <FontAwesomeIcon icon={faChevronDown} size={20} color="#000" />}
+          <TouchableOpacity
+            onPress={() => setExpanded(prev => !prev)}>
+            {
+              <Image
+                source={
+                  expanded ? AppImages.faChevronUp : AppImages.faChevronDown
+                }
+                style={{height: 20, width: 20, resizeMode: 'contain'}}
+              />
+            }
           </TouchableOpacity>
         </View>
 
         <View style={styles.tabContainer}>
-          {tabOptions.map((tab) => (
+          {tabOptions.map(tab => (
             <TouchableOpacity
               key={tab}
               style={[styles.tab, activeTab === tab && styles.activeTab]}
-              onPress={() => setActiveTab(tab)}
-            >
-              <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
+              onPress={() => setActiveTab(tab)}>
+              <Text
+                style={[
+                  styles.tabText,
+                  activeTab === tab && styles.activeTabText,
+                ]}>
                 {tab}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
 
-        <Text style={styles.description}
+        <Text
+          style={styles.description}
           numberOfLines={expanded ? undefined : 2}>
           {parseBoldText(tabContent[activeTab])}
         </Text>
-
       </View>
     );
   };
@@ -165,7 +162,7 @@ const ProviderDetailsScreen = ({ route, navigation }) => {
     };
 
     // ✨ Utility: Parse `**bold**` text into parts
-    const parseBoldText = (text) => {
+    const parseBoldText = text => {
       const parts = text.split(/(\*\*[^*]+\*\*)/g); // split by **bold**
       return parts.map((part, index) => {
         if (part.startsWith('**') && part.endsWith('**')) {
@@ -182,37 +179,44 @@ const ProviderDetailsScreen = ({ route, navigation }) => {
 
     return (
       <View style={styles.section}>
-
         <View style={styles.headerRow}>
           <Text style={styles.sectionTitle}>Net Metering Program Details</Text>
-          <TouchableOpacity onPress={() => setExpanded((prev) => !prev)}>
-            {expanded ? <FontAwesomeIcon icon={faChevronUp} size={20} color="#000" /> : <FontAwesomeIcon icon={faChevronDown} size={20} color="#000" />}
+          <TouchableOpacity
+            onPress={() => setExpanded(prev => !prev)}>
+              <Image
+                  source={
+                      expanded ? AppImages.faChevronUp : AppImages.faChevronDown
+                  }
+                  style={{height:20,width:20,resizeMode:'contain'}}
+              />
           </TouchableOpacity>
         </View>
 
         <View style={styles.tabContainer}>
-          {tabOptions.map((tab) => (
+          {tabOptions.map(tab => (
             <TouchableOpacity
               key={tab}
               style={[styles.tab, activeTab === tab && styles.activeTab]}
-              onPress={() => setActiveTab(tab)}
-            >
-              <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
+              onPress={() => setActiveTab(tab)}>
+              <Text
+                style={[
+                  styles.tabText,
+                  activeTab === tab && styles.activeTabText,
+                ]}>
                 {tab}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
 
-        <Text style={styles.description}
+        <Text
+          style={styles.description}
           numberOfLines={expanded ? undefined : 2}>
           {parseBoldText(tabContent[activeTab])}
         </Text>
-
       </View>
     );
   };
-
 
   return (
     <ScrollView style={styles.container}>
@@ -278,7 +282,7 @@ const styles = StyleSheet.create({
     margin: 16,
     borderRadius: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,

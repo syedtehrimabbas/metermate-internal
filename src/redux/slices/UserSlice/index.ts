@@ -71,7 +71,6 @@ export const userSlice = createSlice({
       state,
       action: PayloadAction<AuthenticationState['userObject']>,
     ) => {
-      console.log(action.payload);
       state.userObject = action.payload;
       MeterMateEncryptedStorage.setItem(
         MeterMateEncryptedStorage.USER_KEY,

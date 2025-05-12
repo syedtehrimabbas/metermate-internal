@@ -29,4 +29,6 @@ export const AppImages = {
     ic_wallet: require('./wallet-05.png'),
     ic_camera: require('./ic_camera.png'),
     ic_gift: require('./ic_gift.png'),
+    faChevronUp: require('./up-arrows.png'),
+    faChevronDown: require('./chevron_down.png'),
 };
