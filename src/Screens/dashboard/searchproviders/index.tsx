@@ -134,7 +134,7 @@ const SearchElectricProviders = ({ navigation }) => {
 
                     <View style={{ flex: 1 }}>
                         <Text style={styles.providerAbout}>{'Offers Net Metering:'}</Text>
-                        <Text style={[styles.providerName, { marginTop: 10 }]}>{item.offers_net_metering ? 'Yes' : 'No'}</Text>
+                        <Text style={[styles.providerName, { marginTop: 10 }]}>{item.offers_net_metering}</Text>
                     </View>
                 </View>
 

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Image,
   ScrollView,
@@ -7,9 +7,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {getScaledHeight, scaledFontWidth} from '../../../utils/AppUtils';
-import {hp} from '../../../utils/Dimension';
-import {AppImages} from '../../../images';
+import { getScaledHeight, scaledFontWidth } from '../../../utils/AppUtils';
+import { hp } from '../../../utils/Dimension';
+import { AppImages } from '../../../images';
+import colors from '../../../theme/colors';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faChevronUp, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 
 type ProviderDetailsParams = {
   ProviderDetails: {
@@ -26,13 +29,15 @@ type ProviderDetailsParams = {
   };
 };
 
-const ProviderDetailsScreen = ({route, navigation}) => {
+const ProviderDetailsScreen = ({ route, navigation }) => {
   const [provider_name, set_provider_name] = useState('');
   const [provider_type, set_provider_type] = useState('');
   const [avg_electric_rate, set_avg_electric_rate] = useState(0);
   const [offers_net_metering, set_offers_net_metering] = useState('');
+  const [provider, set_provider] = useState();
   useEffect(() => {
     const provider = route.params?.provider;
+    set_provider(provider);
     set_provider_name(provider.provider_name);
     set_provider_type(provider.provider_type);
     set_avg_electric_rate(provider.avg_electric_rate);
@@ -53,18 +58,18 @@ const ProviderDetailsScreen = ({route, navigation}) => {
         </View>
       </View>
       {/* Row One */}
-      <View style={{flexDirection: 'row', flex: 2, marginTop: 10}}>
-        <View style={{flex: 1}}>
+      <View style={{ flexDirection: 'row', flex: 2, marginTop: 10 }}>
+        <View style={{ flex: 1 }}>
           <Text style={styles.providerAbout}>{'Average Electric Rate:'}</Text>
-          <Text style={[styles.providerName, {marginTop: 10}]}>
+          <Text style={[styles.providerName, { marginTop: 10 }]}>
             {avg_electric_rate}
           </Text>
         </View>
 
-        <View style={{flex: 1}}>
+        <View style={{ flex: 1 }}>
           <Text style={styles.providerAbout}>{'Offers Net Metering:'}</Text>
-          <Text style={[styles.providerName, {marginTop: 10}]}>
-            {offers_net_metering ? 'Yes' : 'No'}
+          <Text style={[styles.providerName, { marginTop: 10 }]}>
+            {offers_net_metering}
           </Text>
         </View>
       </View>
@@ -84,6 +89,131 @@ const ProviderDetailsScreen = ({route, navigation}) => {
                 </View> */}
     </View>
   );
+
+  const EnergyRateDetails = () => {
+    const [activeTab, setActiveTab] = useState('Simple');
+    const [expanded, setExpanded] = useState(false);
+
+    const tabOptions = ['Simple', 'Moderate', 'The Facts', 'Advanced'];
+
+    const tabContent = {
+      Simple: provider?.energy_rates_simple || '',
+      Moderate: provider?.energy_rates_moderate || '',
+      'The Facts': provider?.energy_rates_facts || '',
+      Advanced: provider?.energy_rates_advanced || '',
+    };
+
+    // ✨ Utility: Parse `**bold**` text into parts
+    const parseBoldText = (text) => {
+      const parts = text.split(/(\*\*[^*]+\*\*)/g); // split by **bold**
+      return parts.map((part, index) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+          return (
+            <Text key={index} style={styles.bold}>
+              {part.slice(2, -2)}
+            </Text>
+          );
+        } else {
+          return <Text key={index}>{part}</Text>;
+        }
+      });
+    };
+
+    return (
+      <View style={styles.section}>
+        <View style={styles.headerRow}>
+          <Text style={styles.sectionTitle}>Energy Rate Details</Text>
+          <TouchableOpacity onPress={() => setExpanded((prev) => !prev)}>
+            {expanded ? <FontAwesomeIcon icon={faChevronUp} size={20} color="#000" /> : <FontAwesomeIcon icon={faChevronDown} size={20} color="#000" />}
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.tabContainer}>
+          {tabOptions.map((tab) => (
+            <TouchableOpacity
+              key={tab}
+              style={[styles.tab, activeTab === tab && styles.activeTab]}
+              onPress={() => setActiveTab(tab)}
+            >
+              <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
+                {tab}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <Text style={styles.description}
+          numberOfLines={expanded ? undefined : 2}>
+          {parseBoldText(tabContent[activeTab])}
+        </Text>
+
+      </View>
+    );
+  };
+
+  const NetMeteringDetails = () => {
+    const [activeTab, setActiveTab] = useState('Simple');
+    const [expanded, setExpanded] = useState(false);
+
+    const tabOptions = ['Simple', 'Moderate', 'The Facts', 'Advanced'];
+
+    const tabContent = {
+      Simple: provider?.net_metering_simple || '',
+      Moderate: provider?.net_metering_moderate || '',
+      'The Facts': provider?.net_metering_facts || '',
+      Advanced: provider?.net_metering_advanced || '',
+    };
+
+    // ✨ Utility: Parse `**bold**` text into parts
+    const parseBoldText = (text) => {
+      const parts = text.split(/(\*\*[^*]+\*\*)/g); // split by **bold**
+      return parts.map((part, index) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+          return (
+            <Text key={index} style={styles.bold}>
+              {part.slice(2, -2)}
+            </Text>
+          );
+        } else {
+          return <Text key={index}>{part}</Text>;
+        }
+      });
+    };
+
+    return (
+      <View style={styles.section}>
+
+        <View style={styles.headerRow}>
+          <Text style={styles.sectionTitle}>Net Metering Program Details</Text>
+          <TouchableOpacity onPress={() => setExpanded((prev) => !prev)}>
+            {expanded ? <FontAwesomeIcon icon={faChevronUp} size={20} color="#000" /> : <FontAwesomeIcon icon={faChevronDown} size={20} color="#000" />}
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.tabContainer}>
+          {tabOptions.map((tab) => (
+            <TouchableOpacity
+              key={tab}
+              style={[styles.tab, activeTab === tab && styles.activeTab]}
+              onPress={() => setActiveTab(tab)}
+            >
+              <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
+                {tab}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <Text style={styles.description}
+          numberOfLines={expanded ? undefined : 2}>
+          {parseBoldText(tabContent[activeTab])}
+        </Text>
+
+      </View>
+    );
+  };
+
+
   return (
     <ScrollView style={styles.container}>
       <TouchableOpacity
@@ -104,29 +234,12 @@ const ProviderDetailsScreen = ({route, navigation}) => {
         />
       </TouchableOpacity>
       {renderProvider()}
+
+      {/* Energy Rate Details */}
+      {EnergyRateDetails()}
+
       {/* Net Metering Program Details */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Net Metering Program Details</Text>
-        <View style={styles.tabContainer}>
-          <View style={[styles.tab, styles.activeTab]}>
-            <Text style={styles.tabText}>Simple</Text>
-          </View>
-          <View style={styles.tab}>
-            <Text style={styles.tabText}>Moderate</Text>
-          </View>
-          <View style={styles.tab}>
-            <Text style={styles.tabText}>The Facts</Text>
-          </View>
-          <View style={styles.tab}>
-            <Text style={styles.tabText}>Advanced</Text>
-          </View>
-        </View>
-        <Text style={styles.description}>
-          The Net Metering Program allows customers who generate their own
-          electricity using solar panels or other renewable sources to receive
-          credits for the excess energy they produce.
-        </Text>
-      </View>
+      {NetMeteringDetails()}
 
       {/* Benefits Section */}
       <View style={styles.section}>
@@ -165,7 +278,7 @@ const styles = StyleSheet.create({
     margin: 16,
     borderRadius: 12,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
@@ -207,6 +320,10 @@ const styles = StyleSheet.create({
     color: '#333',
     marginTop: 8,
   },
+  bold: {
+    fontWeight: 'bold',
+    // color: '#000', // optional: adjust as needed
+  },
   section: {
     backgroundColor: 'white',
     padding: 16,
@@ -214,11 +331,16 @@ const styles = StyleSheet.create({
     marginTop: 0,
     borderRadius: 12,
   },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 16,
   },
   tabContainer: {
     flexDirection: 'row',
@@ -233,17 +355,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   activeTab: {
-    backgroundColor: '#4CAF50',
+    // backgroundColor: '#4CAF50',
+    backgroundColor: colors.accentColor,
     borderRadius: 20,
   },
   tabText: {
     fontSize: 12,
     color: '#333',
+    fontWeight: '600',
   },
   description: {
     fontSize: 14,
     color: '#666',
     lineHeight: 20,
+  },
+  toggleText: {
+    color: '#007bff',
+    marginTop: 6,
+    fontWeight: '500',
   },
   benefitsList: {
     gap: 12,

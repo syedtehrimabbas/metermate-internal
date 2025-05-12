@@ -74,7 +74,8 @@ const SearchHistoryScreen = () => {
                     .eq('user_id', userID);
 
                 if (error) {
-                    console.error('Error fetching zipcode history:', error);
+                    console.log('Error fetching zipcode history:', error);
+                    setLoading(false);
                     return null;
                 }
 
@@ -104,7 +105,7 @@ const SearchHistoryScreen = () => {
             setFilteredData(filteredByText);
         }
     }, [filterText, selectedFilter, searchHistoryData]);
-    
+
 
     const handleFilterChange = (filter) => {
         setSelectedFilter(filter);
