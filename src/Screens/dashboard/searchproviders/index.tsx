@@ -8,6 +8,7 @@ import { hp } from '../../../utils/Dimension.js';
 import { AppFonts } from '../../../fonts';
 import { supabase } from '../../../utils/supabase.ts';
 import { getUserId } from '../../../LocalStorage/index.js';
+import AppContainer from '../../../components/AppContainer';
 
 const SearchElectricProviders = ({ navigation }) => {
     const [search, setSearch] = useState('');
@@ -18,6 +19,7 @@ const SearchElectricProviders = ({ navigation }) => {
     const [filteredProviders, setFilteredProviders] = useState([]);
     const dummyLogo = AppImages.dummy_company_logo_one; // Placeholder for logo path
     const [lastSelectedZipcode, setLastSelectedZipcode] = useState(''); // State to store the last selected zipcode
+    const [loading, setLoading] = useState(false);
 
     // Fetch zip codes from Supabase
     useEffect(() => {
@@ -37,10 +39,13 @@ const SearchElectricProviders = ({ navigation }) => {
     // Fetch energy providers from Supabase
     useEffect(() => {
         const fetchProviders = async () => {
+            setLoading(true)
             const { data, error } = await supabase.from('energy_providers').select('*');
             if (error) {
                 console.error('Error fetching energy providers:', error);
+                setLoading(false)
             } else {
+                setLoading(false)
                 setProviders(data);
                 setFilteredProviders(data);
             }
@@ -94,7 +99,7 @@ const SearchElectricProviders = ({ navigation }) => {
 
             if (insertError) {
                 console.error('Error saving zipcodes history:', insertError.message);
-            } 
+            }
             setLastSelectedZipcode(zipcode.zipcode);
         } else {
             console.log('Selected zipcode is the same as the last one. No action taken.');
@@ -157,107 +162,109 @@ const SearchElectricProviders = ({ navigation }) => {
     );
 
     return (
-        <View style={styles.container}>
-            <TouchableOpacity style={{
-                width: scaledFontWidth(24),
-                height: getScaledHeight(24),
-                marginBottom: hp(2),
-            }} onPress={() => {
-                navigation.goBack();
-            }}>
-                <Image source={AppImages.back_arrow} style={{
-                    width: scaledFontWidth(24),
-                    height: getScaledHeight(24),
-                }} />
-            </TouchableOpacity>
+        <AppContainer
+            loading={loading}
+            children={
+                <View style={styles.container}>
+                    <TouchableOpacity style={{
+                        width: scaledFontWidth(24),
+                        height: getScaledHeight(24),
+                        marginBottom: hp(2),
+                    }} onPress={() => {
+                        navigation.goBack();
+                    }}>
+                        <Image source={AppImages.back_arrow} style={{
+                            width: scaledFontWidth(24),
+                            height: getScaledHeight(24),
+                        }} />
+                    </TouchableOpacity>
 
-            {/* Search Bar */}
-            <View style={styles.searchBarContainer}>
-                <TextInput
-                    style={styles.searchInput}
-                    placeholder="Search Zipcode"
-                    value={search}
-                    onChangeText={handleSearch}
-                    onFocus={() => setDropdownVisible(true)}
-                    onBlur={() => setDropdownVisible(false)} // Hide dropdown when input loses focus
-                />
+                    {/* Search Bar */}
+                    <View style={styles.searchBarContainer}>
+                        <TextInput
+                            style={styles.searchInput}
+                            placeholder="Search Zipcode"
+                            value={search}
+                            onChangeText={handleSearch}
+                            onFocus={() => setDropdownVisible(true)}
+                            onBlur={() => setDropdownVisible(false)} // Hide dropdown when input loses focus
+                        />
 
-                <View style={[styles.searchBarChild, styles.searchPosition]}>
-                    {search ? (
-                        <Pressable onPress={clearSearch} style={styles.iconContainer}>
-                            <Image source={AppImages.ic_cross} style={styles.icon} />
-                        </Pressable>
-                    ) : (
-                        <View style={styles.iconContainer}>
-                            <Image source={AppImages.nav_search} style={styles.icon} />
+                        <View style={[styles.searchBarChild, styles.searchPosition]}>
+                            {search ? (
+                                <Pressable onPress={clearSearch} style={styles.iconContainer}>
+                                    <Image source={AppImages.ic_cross} style={styles.icon} />
+                                </Pressable>
+                            ) : (
+                                <View style={styles.iconContainer}>
+                                    <Image source={AppImages.nav_search} style={styles.icon} />
+                                </View>
+                            )}
                         </View>
-                    )}
-                </View>
 
-                {/* Dropdown for Zipcodes */}
-                {isDropdownVisible && filteredZipcodes.length > 0 && (
-                    <View style={styles.dropdown}>
-                        {filteredZipcodes.map((item) => (
-                            <TouchableOpacity
-                                key={item.zipcode}
-                                onPress={() => handleZipcodeSelect(item)}
-                                style={styles.dropdownItem}
-                            >
-                                <Text style={styles.dropdownText}>{item.zipcode}</Text>
-                            </TouchableOpacity>
-                        ))}
+                        {/* Dropdown for Zipcodes */}
+                        {isDropdownVisible && filteredZipcodes.length > 0 && (
+                            <View style={styles.dropdown}>
+                                {filteredZipcodes.map((item) => (
+                                    <TouchableOpacity
+                                        key={item.zipcode}
+                                        onPress={() => handleZipcodeSelect(item)}
+                                        style={styles.dropdownItem}
+                                    >
+                                        <Text style={styles.dropdownText}>{item.zipcode}</Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                        )}
                     </View>
-                )}
-            </View>
 
-            {(filteredProviders && filteredProviders.length > 0) &&
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 15 }}>
-                    < Text
+                    {(filteredProviders && filteredProviders.length > 0) &&
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 15 }}>
+                            < Text
+                                style={{
+                                    fontSize: scaledFontWidth(15),
+                                    lineHeight: 25,
+                                    letterSpacing: -0.2,
+                                    color: colors.black1,
+                                    fontFamily: AppFonts.inter_bold,
+                                }}>{'Zipcode Results'} <Text
+                                    style={{
+                                        fontSize: scaledFontWidth(12),
+                                    }}>{String(filteredProviders.length).padStart(2, '0')}</Text>
+                            </Text>
+                        </View>
+                    }
+                    {(filteredProviders && filteredProviders.length === 0) && <View
                         style={{
-                            fontSize: scaledFontWidth(15),
-                            lineHeight: 25,
-                            letterSpacing: -0.2,
-                            color: colors.black1,
-                            fontFamily: AppFonts.inter_bold,
-                        }}>{'Zipcode Results'} <Text
-                            style={{
-                                fontSize: scaledFontWidth(12),
-                            }}>{String(filteredProviders.length).padStart(2, '0')}</Text>
-                    </Text>
+                            width: 200,
+                            height: 40,
+                            backgroundColor: Colors.white,
+                            borderRadius: 20,
+                            alignSelf: 'center',
+                            marginTop: hp(35),
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                        }}>
+                        <Text style={[styles.providerName, {
+                            color: '#EA4335',
+                            fontFamily: AppFonts.inter_regular
+                        }]}>{'Incorrect zipcode'}</Text>
+
+                    </View>}
+
+
+                    < FlatList
+                        data={filteredProviders}
+                        renderItem={renderProvider}
+                        keyExtractor={(item) => item.uuid.toString()}
+                        contentContainerStyle={styles.resultsContainer}
+                    />
+
                 </View>
             }
-            {(filteredProviders && filteredProviders.length === 0) && <View
-                style={{
-                    width: 200,
-                    height: 40,
-                    backgroundColor: Colors.white,
-                    borderRadius: 20,
-                    alignSelf: 'center',
-                    marginTop: hp(35),
-                    justifyContent: 'center',
-                    alignItems: 'center'
-                }}>
-                <Text style={[styles.providerName, {
-                    color: '#EA4335',
-                    fontFamily: AppFonts.inter_regular
-                }]}>{'Incorrect zipcode'}</Text>
-
-            </View>}
-
-
-
-            {/* Provider Results */}
-            <FlatList
-                data={filteredProviders}
-                renderItem={renderProvider}
-                keyExtractor={(item) => item.uuid.toString()}
-                contentContainerStyle={styles.resultsContainer}
-            />
-        </View>
-    )
-        ;
-}
-    ;
+        />
+    );
+};
 
 const styles = StyleSheet.create({
     container: {
