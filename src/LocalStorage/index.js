@@ -41,25 +41,3 @@ class MeterMateEncryptedStorage {
 }
 
 export default MeterMateEncryptedStorage;
-
-export async function getUserData() {
-  try {
-    const userDataString = await AsyncStorage.getItem('user_data');
-    if (userDataString !== null) {
-      const userData = JSON.parse(userDataString);
-      // console.log('User Data:', userData);
-      return userData;
-    } else {
-      console.log('No user data found');
-      return null;
-    }
-  } catch (e) {
-    console.log('Error reading user data from AsyncStorage:', e);
-    return null;
-  }
-}
-
-export async function getUserId() {
-  const user = await getUserData();
-  return user?.id ?? null;
-}

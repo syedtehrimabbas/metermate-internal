@@ -16,8 +16,8 @@ import {getScaledHeight, scaledFontWidth} from '../../../utils/AppUtils.js';
 import {hp} from '../../../utils/Dimension.js';
 import {AppFonts} from '../../../fonts';
 import {supabase} from '../../../utils/supabase.ts';
-import {getUserId} from '../../../LocalStorage/index.js';
 import AppContainer from '../../../components/AppContainer';
+import { useSelector } from 'react-redux';
 
 function ProvidersSection({filteredProviders, renderProvider}) {
   return (
@@ -68,6 +68,7 @@ const SearchElectricProviders = ({navigation}) => {
   const dummyLogo = AppImages.dummy_company_logo_one; // Placeholder for logo path
   const [lastSelectedZipcode, setLastSelectedZipcode] = useState(''); // State to store the last selected zipcode
   const [loading, setLoading] = useState(false);
+  const {userObject} = useSelector((state: any) => state.userInfo);
 
   // Fetch zip codes from Supabase
   useEffect(() => {
@@ -135,7 +136,7 @@ const SearchElectricProviders = ({navigation}) => {
 
     // check if the selected zipcode is different from the last selected one
     if (lastSelectedZipcode !== zipcode.zipcode) {
-      const userID = await getUserId();
+      const userID = userObject.user.id; // Get the user ID from the Redux store
 
       // If different, store the selected zipcode in the lastSelectedZipcode variable and also add in supabase for history
       const {error: insertError} = await supabase
@@ -359,7 +360,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     borderRadius: 8,
     elevation: 5, // Add shadow for better visibility
-    maxHeight: 145,
     overflow: 'hidden',
   },
   dropdownItem: {

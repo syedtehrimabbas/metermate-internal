@@ -20,6 +20,7 @@ export const AppImages = {
     nav_search_history: require('./ic_search_history.png'),
     lines_vector: require('./lines_vector.png'),
     user_placeholder: require('./user_placeholder.png'),
+    user_placeholder_default: require('./user_placeholder_default.png'),
     logout: require('./logout.png'),
     back_arrow: require('./chevron-left.png'),
     dummy_company_logo_one: require('./dummy_company_logo_one.png'),

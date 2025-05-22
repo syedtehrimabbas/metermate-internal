@@ -19,6 +19,8 @@ import { wp } from '../../utils/Dimension.js';
 import { supabase } from '../../utils/supabase.ts';
 import AppContainer from '../../components/AppContainer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useDispatch } from 'react-redux';
+import { updateUser } from '../../redux';
 
 type Props = {
   navigation: any;
@@ -36,6 +38,7 @@ const SignupScreen = ({ navigation }: Props) => {
   const passwordIRef = useRef(null);
   const cPasswordIRef = useRef(null);
   const promoRef = useRef(null);
+  const dispatch = useDispatch();
 
   async function signUpWithEmail() {
     // Validate name
@@ -79,9 +82,9 @@ const SignupScreen = ({ navigation }: Props) => {
         password: password,
       })
       .then(response => {
-        const { user } = response.data;
+        const { user, session } = response.data;
         if (user) {
-          storeUserData(user);
+          storeUserData(user, session);
         }
       })
       .catch(error => {
@@ -93,28 +96,33 @@ const SignupScreen = ({ navigation }: Props) => {
       });
   }
 
-  const storeUserData = async user => {
+  const storeUserData = async (user, session) => {
     // Insert additional user data into the 'users' table
+    const localUserData = {
+      id: user.id,
+      name: name,
+      email: email,
+      promo_code: promoCode,
+      profile_photo: '',
+    };
     const { error: insertError } = await supabase.from('user_profiles').insert([
-      {
-        id: user.id,
-        name: name,
-        email: email,
-        promo_code: promoCode,
-        profile_photo: '',
-      },
+      localUserData,
     ]);
 
     if (insertError) {
       Alert.alert('Error saving user data:', insertError.message);
     } else {
       // User data saved successfully
-      // Save user ID in AsyncStorage
-      try {
-        await AsyncStorage.setItem('user_data', JSON.stringify(user) || '');
-      } catch (e) {
-        console.log('Error saving user to AsyncStorage:', e);
-      }
+      session.localUserData = localUserData;
+      
+      dispatch(updateUser(session));
+
+      // // Save user ID in AsyncStorage
+      // try {
+      //   await AsyncStorage.setItem('user_data', JSON.stringify(user) || '');
+      // } catch (e) {
+      //   console.log('Error saving user to AsyncStorage:', e);
+      // }
 
       navigation.navigate('ChooseSubscriptionScreen');
     }

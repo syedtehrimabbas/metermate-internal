@@ -20,13 +20,10 @@ const RootNavigation = (props: Props) => {
   }, [userObject]);
 
   React.useEffect(() => {
-    setTimeout(() => {
-      setSplash(false);
-      MeterMateEncryptedStorage.getItem(MeterMateEncryptedStorage.USER_KEY)
+    MeterMateEncryptedStorage.getItem(MeterMateEncryptedStorage.USER_KEY)
         .then(user => {
           if (user) {
-            const jsonUser = JSON.parse(user);
-            setUserDetails(jsonUser);
+            setUserDetails(user);
             dispatch(updateUser(user));
           } else {
             console.log('No user data found.');
@@ -35,6 +32,8 @@ const RootNavigation = (props: Props) => {
         .catch(error => {
           console.error('Error retrieving user data:', error);
         });
+    setTimeout(() => {
+      setSplash(false);
     }, 3000);
   }, []);
 

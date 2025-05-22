@@ -5,10 +5,10 @@ import colors from '../../../theme/colors.js';
 import { scaledFontWidth } from '../../../utils/AppUtils.js';
 import { supabase } from '../../../utils/supabase.ts';
 import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
-import { getUserId } from '../../../LocalStorage/index.js';
 import { format } from 'date-fns';
 import AppContainer from '../../../components/AppContainer';
 import { useFocusEffect } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
 
 // SAMPLE DATA
 // const searchHistoryData = [
@@ -59,6 +59,8 @@ const SearchHistoryScreen = () => {
     const [searchHistoryData, setSearchHistoryData] = useState([]); // full raw formatted data
     const [filteredData, setFilteredData] = useState([]);   // store the filtered data
     const [loading, setLoading] = useState(false);
+    const {userObject} = useSelector((state: any) => state.userInfo);
+
     // const [filteredData, setFilteredData] = useState(searchHistoryData); 
 
     // Using useFocusEffect to fetch data when the screen is focused every time
@@ -67,7 +69,7 @@ const SearchHistoryScreen = () => {
             const getZipcodeHistoryForUser = async () => {
 
                 setLoading(true);
-                const userID = await getUserId();
+                const userID = userObject.user.id;
                 const { data, error } = await supabase
                     .from('zipcodes_history')
                     .select('*')

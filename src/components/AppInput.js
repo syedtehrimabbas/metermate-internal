@@ -17,6 +17,7 @@ export const AppInput = forwardRef(({
                                         marginTop,
                                         onSubmitEditing,
                                         blurOnSubmit = false,
+                                        editable = true,
                                     }, ref) => {
     const [passwordVisible, PasswordVisible] = useState(isPassword);
     return (
@@ -46,6 +47,7 @@ export const AppInput = forwardRef(({
                 placeholderTextColor={colors.inputColor}
                 value={value}
                 autoFocus={autoFocus}
+                editable={editable}
                 keyboardType={keyboardType}
                 returnKeyType={returnKeyType}
                 secureTextEntry={isPassword && passwordVisible}

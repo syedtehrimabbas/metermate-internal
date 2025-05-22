@@ -71,13 +71,28 @@ const LoginScreen = ({ navigation }: Props) => {
             error.message || 'An error occurred. Please try again.',
           );
         } else {
-          dispatch(updateUser(session));
-          // Save user ID in AsyncStorage
           try {
-            await AsyncStorage.setItem('user_data', JSON.stringify(user) || '');
+            // Fetch additional user data from 'user_profiles' table
+            const { data: profileData, error: profileError } = await supabase
+              .from('user_profiles')
+              .select('*')
+              .eq('id', user.id)
+              .single();
+
+            if (profileError) {
+              console.log('Error fetching user profile:', profileError);
+            } else {
+              // Add the user profile data to the session object
+              session.localUserData = profileData;
+            }
+            // console.log('session Data:', JSON.stringify(session));
+
+            // Dispatch with updated session
+            dispatch(updateUser(session));
           } catch (e) {
-            console.log('Error saving user to AsyncStorage:', e);
+            console.log('Error during post-login handling:', e);
           }
+
         }
       })
       .catch(error => {
