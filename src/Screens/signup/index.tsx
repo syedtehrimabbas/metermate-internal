@@ -1,8 +1,10 @@
 import React, { useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   Image,
   Keyboard,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -21,6 +23,8 @@ import AppContainer from '../../components/AppContainer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch } from 'react-redux';
 import { updateUser } from '../../redux';
+import { openSettings, PERMISSIONS, request, RESULTS } from 'react-native-permissions';
+import { Asset, launchImageLibrary } from 'react-native-image-picker';
 
 type Props = {
   navigation: any;
@@ -33,12 +37,98 @@ const SignupScreen = ({ navigation }: Props) => {
   const [promoCode, PromoCode] = useState<string | undefined>();
   const [isTermsAccepted, acceptTerms] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [pickedImage, setPickedImage] = useState<Asset | null>(null);
+  // const [profileImage, setProfileImage] = useState<string | undefined>();
+
+  const [imageLoading, setImageLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
+  const [imageSource, setImageSource] = useState(!imageError && ''
+    ? { uri: '' }
+    : AppImages.signup_image_ph);
 
   const emailInputRef = useRef(null);
   const passwordIRef = useRef(null);
   const cPasswordIRef = useRef(null);
   const promoRef = useRef(null);
   const dispatch = useDispatch();
+
+
+  const requestAllPermissions = async () => {
+    if (Platform.OS !== 'android') return true;
+
+    const permissions = [];
+
+    const isAndroid13OrHigher = Platform.Version >= 33;
+    const isAndroid11OrHigher = Platform.Version >= 30;
+
+    const storagePermission = isAndroid13OrHigher
+      ? PERMISSIONS.ANDROID.READ_MEDIA_IMAGES
+      : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE;
+
+    permissions.push(PERMISSIONS.ANDROID.CAMERA);
+    permissions.push(storagePermission);
+
+    if (isAndroid13OrHigher) {
+      // Also ask for video and audio if needed
+      if (PERMISSIONS.ANDROID.READ_MEDIA_VIDEO)
+        permissions.push(PERMISSIONS.ANDROID.READ_MEDIA_VIDEO);
+    }
+
+    // Add MANAGE_EXTERNAL_STORAGE only if defined in the library
+    if (isAndroid11OrHigher && PERMISSIONS.ANDROID.MANAGE_EXTERNAL_STORAGE) {
+      permissions.push(PERMISSIONS.ANDROID.MANAGE_EXTERNAL_STORAGE);
+    }
+
+    //request one by one or all at once
+    const statuses: Record<string, string> = {};
+    for (const perm of permissions) {
+      try {
+        const result = await request(perm);
+        statuses[perm] = result;
+      } catch (error) {
+        console.error(`Failed requesting permission ${perm}`, error);
+        statuses[perm] = 'error';
+      }
+    }
+
+    // const result = await requestMultiple(permissions);
+
+    const allGranted = Object.values(statuses).every(status => status === RESULTS.GRANTED);
+
+    if (!allGranted) {
+      Alert.alert(
+        'Permissions Needed',
+        'Please grant all required permissions to continue using this feature.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Open Settings', onPress: () => openSettings() },
+        ]
+      );
+    }
+
+    return allGranted;
+  };
+
+  const handleImagePicker = async () => {
+    const hasPermission = await requestAllPermissions();
+    if (!hasPermission) {
+      Alert.alert('Permission denied', 'Storage permission is required to select an image.');
+      return;
+    }
+
+    const response = await launchImageLibrary({ mediaType: 'photo', selectionLimit: 1 });
+    if (response.didCancel || !response.assets || response.assets.length === 0) {
+      return;
+    }
+
+    const bucketName = 'profiles';
+    const imageAsset = response.assets[0];
+
+    setPickedImage(imageAsset);
+    // setProfileImage(imageAsset.uri);
+    setImageSource({ uri: imageAsset.uri });
+
+  };
 
   async function signUpWithEmail() {
     // Validate name
@@ -55,10 +145,10 @@ const SignupScreen = ({ navigation }: Props) => {
     }
 
     // Validate password
-    if (password.length < 6) {
+    if (password.length < 8) {
       Alert.alert(
         'Validation Error',
-        'Password must be at least 6 characters long.',
+        'Password must be at least 8 characters long.',
       );
       return;
     }
@@ -76,15 +166,61 @@ const SignupScreen = ({ navigation }: Props) => {
     }
 
     setLoading(true);
+    // console.log('Starting SignUp ...');
     await supabase.auth
       .signUp({
         email: email,
         password: password,
       })
-      .then(response => {
+      .then(async response => {
         const { user, session } = response.data;
+
         if (user) {
-          storeUserData(user, session);
+
+          // console.log('Continue, user is valid');
+          if (pickedImage) {
+            // If an image is picked, upload it
+            await uploadProfileImage(user, session)
+              .then(async (imageUrl) => {
+                if (imageUrl) {
+                  // If image upload is successful, store user data
+                  const localUserData = {
+                    id: user.id,
+                    name: name,
+                    email: email,
+                    promo_code: promoCode,
+                    profile_photo: imageUrl, // Use the uploaded image URL
+                  };
+                  const { error: insertError } = await supabase.from('user_profiles').insert([
+                    localUserData,
+                  ]);
+
+                  if (insertError) {
+                    Alert.alert('Error saving user data:', insertError.message);
+                  } else {
+                    // User data saved successfully
+                    session.localUserData = localUserData;
+
+                    // console.log('localUserData found with image:', localUserData);
+                    dispatch(updateUser(session));
+
+                    navigation.navigate('ChooseSubscriptionScreen');
+                  }
+                }
+                else {
+                  //if failed to upload image or retrieve image URL
+                  await storeUserDataWithoutImage(user, session)
+                }
+              })
+              .catch(async error => {
+                console.error('Error uploading profile image:', error);
+                // Alert.alert('Error uploading profile image:', error.message);
+                await storeUserDataWithoutImage(user, session)
+              });
+          } else {
+            // If no image is picked
+            await storeUserDataWithoutImage(user, session);
+          }
         }
       })
       .catch(error => {
@@ -96,7 +232,65 @@ const SignupScreen = ({ navigation }: Props) => {
       });
   }
 
-  const storeUserData = async (user, session) => {
+  const uploadProfileImage = async (user, session) => {
+    if (!pickedImage) {
+      Alert.alert('No image selected', 'Please select an image to upload.');
+      return;
+    }
+    const bucketName = 'profiles';
+    const imageAsset = pickedImage;
+
+    const fileName = `user_new_${Date.now()}.jpg`;
+    const fileUri = imageAsset.uri;
+    const fileType = imageAsset.type;
+
+    // Converting image to blob (needed for supabase upload)
+    const imageFile = {
+      uri: fileUri,
+      name: fileName,
+      type: fileType
+    };
+    console.log('Image file:', imageFile);
+
+    try {
+      // Upload image to Supabase storage
+      const { data, error } = await supabase.storage
+        .from(bucketName) // make sure this bucket exists
+        .upload(user.id + '/' + fileName, imageFile, {
+          cacheControl: '3600',
+          upsert: true,
+          contentType: fileType,
+        });
+
+      if (error) {
+        console.error('Error uploading image:', error);
+        // Alert.alert('Error', 'Failed to upload image. Please try again.');
+        return;
+      }
+      // console.log('Image uploaded successfully:', data);
+
+      // Get the public URL of the uploaded image
+      const { data: publicUrlData } = await supabase.storage
+        .from(bucketName)
+        .getPublicUrl(data.path);
+      if (!publicUrlData) {
+        console.error('No public URL found for the uploaded image.');
+        // Alert.alert('Error', 'Failed to retrieve image URL. Please try again.');
+        return;
+      }
+      const publicUrl = publicUrlData.publicUrl;
+      console.log('Image public URL:', publicUrl);
+      // Return the public URL of the uploaded image
+      return publicUrl;
+
+    } catch (err) {
+      console.error(err);
+      // Alert.alert('Error', err.message || 'Something went wrong.');
+      return null; // Return null if there was an error
+    }
+  }
+
+  const storeUserDataWithoutImage = async (user, session) => {
     // Insert additional user data into the 'users' table
     const localUserData = {
       id: user.id,
@@ -114,7 +308,8 @@ const SignupScreen = ({ navigation }: Props) => {
     } else {
       // User data saved successfully
       session.localUserData = localUserData;
-      
+
+      // console.log('localUserData found no image:', localUserData);
       dispatch(updateUser(session));
 
       // // Save user ID in AsyncStorage
@@ -159,6 +354,33 @@ const SignupScreen = ({ navigation }: Props) => {
           </Text>
 
           <View style={{ alignSelf: 'center', marginVertical: 30 }}>
+            <View style={styles.imageContainer}>
+              {imageLoading && !imageError && (
+                <ActivityIndicator style={styles.loader} size="large" color="#888" />
+              )}
+              <Image
+                style={styles.icon}
+                resizeMode="cover"
+                source={imageSource}
+                onLoadStart={() => setImageLoading(true)}
+                onLoadEnd={() => setImageLoading(false)}
+                onError={() => {
+                  setImageLoading(false);
+                  // setImageError(true);
+                }}
+              />
+            </View>
+            <TouchableOpacity
+              onPress={() => {
+                handleImagePicker();
+              }}
+            >
+              <Image
+                style={{ width: 28, height: 28, resizeMode: 'contain', position: 'absolute', bottom: 0, right: 5 }}
+                source={AppImages.ic_camera} />
+            </TouchableOpacity>
+          </View>
+          {/* <View style={{ alignSelf: 'center', marginVertical: 30 }}>
             <Image
               style={{ width: 100, height: 100, resizeMode: 'contain' }}
               source={AppImages.signup_image_ph}
@@ -176,7 +398,7 @@ const SignupScreen = ({ navigation }: Props) => {
                 source={AppImages.plus_icon}
               />
             </TouchableOpacity>
-          </View>
+          </View> */}
 
           <ScrollView>
             <AppInput
@@ -324,6 +546,24 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     flex: 1,
     padding: 20,
+  },
+  imageContainer: {
+    width: 100,
+    height: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  icon: {
+    borderRadius: 100,
+    flex: 1,
+    height: '100%',
+    overflow: 'hidden',
+    width: '100%',
+    backgroundColor: 'rgba(151, 148, 148, 0.46)',
+  },
+  loader: {
+    position: 'absolute',
+    zIndex: 1,
   },
 });
 export default SignupScreen;
