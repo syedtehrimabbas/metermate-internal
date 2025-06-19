@@ -1,9 +1,13 @@
-import React from 'react';
-import {Image, ImageSourcePropType, Platform, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, { useState } from 'react';
+import { Alert, Image, ImageSourcePropType, Linking, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import colors from '../../theme/colors';
-import {AppImages} from '../../images';
-import {AppFonts} from "../../fonts";
-import {getScaledHeight, scaledFontWidth} from "../../utils/AppUtils.js";
+import { AppImages } from '../../images';
+import { AppFonts } from "../../fonts";
+import { getScaledHeight, scaledFontWidth } from "../../utils/AppUtils.js";
+import { supabase } from '../../utils/supabase.ts';
+import { useDispatch } from 'react-redux';
+import { updateUser } from '../../redux';
+import AppContainer from '../../components/AppContainer';
 
 type SocialButtonProps = {
     onPress: () => void; // Simple function type for onPress
@@ -11,7 +15,7 @@ type SocialButtonProps = {
     title: string;
 };
 
-const SocialButton: React.FC<SocialButtonProps> = ({onPress, icon, title}) => {
+const SocialButton: React.FC<SocialButtonProps> = ({ onPress, icon, title }) => {
     const styles = StyleSheet.create({
         buttonContainer: {
             borderRadius: 16,
@@ -43,7 +47,7 @@ const SocialButton: React.FC<SocialButtonProps> = ({onPress, icon, title}) => {
 
     return (
         <TouchableOpacity style={styles.buttonContainer} onPress={onPress}>
-            <Image style={styles.iconStyle} resizeMode="cover" source={icon}/>
+            <Image style={styles.iconStyle} resizeMode="cover" source={icon} />
             <Text style={styles.buttonTitle}>{title}</Text>
         </TouchableOpacity>
     );
@@ -51,61 +55,213 @@ const SocialButton: React.FC<SocialButtonProps> = ({onPress, icon, title}) => {
 type Props = {
     navigation: any;
 };
-const SocialLogin = ({navigation}: Props) => {
+const SocialLogin = ({ navigation }: Props) => {
+
+    React.useEffect(() => {
+        const handleDeepLink = async ({ url }) => {
+            console.log('Received deep link:', url);
+
+            // Extract the access_token and other params from the URL
+            const params = new URLSearchParams(url.split('#')[1]);
+            const accessToken = params.get('access_token');
+            const refreshToken = params.get('refresh_token');
+            const expiresIn = params.get('expires_in');
+
+            if (accessToken) {
+                const { data: { session, user }, error } = await supabase.auth.setSession({
+                    access_token: accessToken,
+                    refresh_token: refreshToken
+                });
+
+                if (error) {
+                    console.error('Error setting session:', error.message);
+                    setLoading(false);
+                    Alert.alert('SignIn error', 'Unable to retrieve user data. Please try again.');
+                } else {
+                    console.log('Login successful:', user);
+
+                    // Now store the user data in your user_profiles table
+                    await storeUserData(user, session);
+                }
+            }
+        };
+
+        const subscription = Linking.addEventListener('url', handleDeepLink);
+
+        return () => {
+            subscription.remove();
+        };
+    }, []);
+
+    // const redirectUrl = 'https://puxbrtbjpgtxoidnlwch.supabase.co/auth/v1/callback';
+    // const redirectTo = Linking.createURL('login-callback');  // as we are not using expo so expo linking will not be used
+
+    const dispatch = useDispatch();
+    const [loading, setLoading] = useState(false);
+    const redirectTo = 'myapp://login-callback';
+
+    const signInWithProvider = async (authProvider) => {
+        console.log('Signing redirectTo: ', redirectTo);
+
+        setLoading(true);
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: authProvider,
+            options: {
+                redirectTo,
+            },
+        })
+
+        if (error) {
+            Alert.alert('Login error', error.message)
+            setLoading(false);
+        } else {
+            // This will open the browser
+            console.log('Redirecting to:', data.url);
+            // You can use Linking to open the URL in the browser
+            Linking.openURL(data.url)
+        }
+    }
+
+    const storeUserData = async (user, session) => {
+        try {
+            // First check if user already exists in user_profiles
+            const { data: existingUser, error: fetchError } = await supabase
+                .from('user_profiles')
+                .select('*')
+                .eq('id', user.id)
+                .single();
+
+            // If user doesn't exist, create a new record
+            if (!existingUser || fetchError) {
+                const localUserData = {
+                    id: user.id,
+                    name: user.user_metadata?.full_name || user.user_metadata?.name || '',
+                    email: user.email || '',
+                    promo_code: '',
+                    profile_photo: user.user_metadata?.avatar_url || user.user_metadata?.picture || '',
+                };
+
+                const { error: insertError } = await supabase
+                    .from('user_profiles')
+                    .insert([localUserData]);
+
+                if (insertError) {
+                    Alert.alert('Error saving user data:', insertError.message);
+                } else {
+
+                    console.log('User profile created successfully');
+
+                    // Update session with additional user data if needed
+                    const updatedSession = {
+                        ...session,
+                        localUserData: localUserData
+                    };
+
+                    dispatch(updateUser(updatedSession));
+
+                    navigation.navigate('ChooseSubscriptionScreen');
+                }
+
+            } else {
+                console.log('User already exists in profiles');
+
+                const userData = {
+                    id: user.id,
+                    name: user.user_metadata?.name || existingUser?.name || '',
+                    email: user.email || existingUser?.email || '',
+                    profile_photo: user.user_metadata?.picture || existingUser?.profile_photo || '',
+                    promo_code: existingUser?.promo_code || '',
+                };
+
+                const { error } = await supabase
+                    .from('user_profiles')
+                    .upsert(userData);
+
+                if (error) {
+                    Alert.alert('Error saving user data:', error.message);
+                } else {
+                    const updatedSession = {
+                        ...session,
+                        localUserData: userData
+                    };
+
+                    dispatch(updateUser(updatedSession));
+                }
+
+                // Navigate to appropriate screen
+                navigation.navigate('ChooseSubscriptionScreen');
+                // use following when subscription work is done
+                // navigation.navigate(existingUser.subscription_status ? 'HomeScreen' : 'ChooseSubscriptionScreen');
+            }
+        } catch (error) {
+            console.error('Error storing user data:', error.message);
+            Alert.alert('Error', 'Failed to save user data. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
-        <View
-            style={styles.container}>
-            <Image
-                style={{
-                    width: 48,
-                    height: 48,
-                    resizeMode: 'contain',
-                }}
-                source={AppImages.logo_png}
-            />
-            <Text style={styles.title}>Metermate: Your Energy Efficiency Companion</Text>
-            <Text style={styles.letsMakeEnergy}>Let's make energy management simple and efficient.</Text>
+        <AppContainer
+            loading={loading}
+            children={
+                <View
+                    style={styles.container}>
+                    <Image
+                        style={{
+                            width: 48,
+                            height: 48,
+                            resizeMode: 'contain',
+                        }}
+                        source={AppImages.logo_png}
+                    />
+                    <Text style={styles.title}>Metermate: Your Energy Efficiency Companion</Text>
+                    <Text style={styles.letsMakeEnergy}>Let's make energy management simple and efficient.</Text>
 
-            <SocialButton
-                onPress={() => {
-                    navigation.navigate('SignupScreen');
-                }}
-                icon={AppImages.mail}
-                title="Continue with Email"
-            />
+                    <SocialButton
+                        onPress={() => {
+                            navigation.navigate('SignupScreen');
+                        }}
+                        icon={AppImages.mail}
+                        title="Continue with Email"
+                    />
 
-            <SocialButton
-                onPress={() => {
-                    console.log('Button pressed');
-                }}
-                icon={AppImages.facebook}
-                title="Continue with Facebook"
-            />
+                    <SocialButton
+                        onPress={() => {
+                            //By Facebook
+                            signInWithProvider('facebook');
+                        }}
+                        icon={AppImages.facebook}
+                        title="Continue with Facebook"
+                    />
 
-            <SocialButton
-                onPress={() => {
-                    console.log('Button pressed');
-                }}
-                icon={AppImages.google}
-                title="Continue with Google"
-            />
-            {Platform.OS === 'android' && <SocialButton
-                onPress={() => {
-                    console.log('Button pressed');
-                }}
-                icon={AppImages.apple}
-                title="Continue with Apple"
-            />}
+                    <SocialButton
+                        onPress={() => {
+                            //By Google
+                            signInWithProvider('google');
+                        }}
+                        icon={AppImages.google}
+                        title="Continue with Google"
+                    />
+                    {Platform.OS === 'android' && <SocialButton
+                        onPress={() => {
+                            //By Apple
+                            signInWithProvider('apple');
+                        }}
+                        icon={AppImages.apple}
+                        title="Continue with Apple"
+                    />}
 
-            <View style={styles.rectangleView}>
-                <Text onPress={() => {
-                    navigation.goBack()
-                }} style={styles.dontHaveAn}>{'Already have an account? '} <Text
-                    style={{color: colors.black1, textDecorationLine: 'underline'}}>{'Login'}</Text></Text>
-            </View>
+                    <View style={styles.rectangleView}>
+                        <Text onPress={() => {
+                            navigation.goBack()
+                        }} style={styles.dontHaveAn}>{'Already have an account? '} <Text
+                            style={{ color: colors.black1, textDecorationLine: 'underline' }}>{'Login'}</Text></Text>
+                    </View>
 
-        </View>
+                </View>
+            }
+        />
     );
 };
 const styles = StyleSheet.create({

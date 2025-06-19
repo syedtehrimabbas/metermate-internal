@@ -312,13 +312,6 @@ const SignupScreen = ({ navigation }: Props) => {
       // console.log('localUserData found no image:', localUserData);
       dispatch(updateUser(session));
 
-      // // Save user ID in AsyncStorage
-      // try {
-      //   await AsyncStorage.setItem('user_data', JSON.stringify(user) || '');
-      // } catch (e) {
-      //   console.log('Error saving user to AsyncStorage:', e);
-      // }
-
       navigation.navigate('ChooseSubscriptionScreen');
     }
   };
