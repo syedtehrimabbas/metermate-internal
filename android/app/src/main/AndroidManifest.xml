@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA"/>
@@ -29,6 +30,19 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
+        <intent-filter android:label="social_login">
+          <action android:name="android.intent.action.VIEW" />
+          <category android:name="android.intent.category.DEFAULT" />
+          <category android:name="android.intent.category.BROWSABLE" />
+          <data android:scheme="myapp" android:host="login-callback" />
+          <!-- <data android:scheme="${appAuthRedirectScheme}" android:host="login-callback" /> -->
+        </intent-filter>
       </activity>
+
+      <!-- Removing this activity and its intent filters because two apps are 
+      shown with scheme myapp during social login-->
+      <activity
+        android:name="net.openid.appauth.RedirectUriReceiverActivity"
+        tools:node="remove" />
     </application>
 </manifest>
