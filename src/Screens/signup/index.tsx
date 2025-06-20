@@ -202,7 +202,7 @@ const SignupScreen = ({ navigation }: Props) => {
                     session.localUserData = localUserData;
 
                     // console.log('localUserData found with image:', localUserData);
-                    dispatch(updateUser(session));
+                    // dispatch(updateUser(session));
 
                     navigation.navigate('ChooseSubscriptionScreen');
                   }
@@ -310,7 +310,7 @@ const SignupScreen = ({ navigation }: Props) => {
       session.localUserData = localUserData;
 
       // console.log('localUserData found no image:', localUserData);
-      dispatch(updateUser(session));
+      // dispatch(updateUser(session));
 
       navigation.navigate('ChooseSubscriptionScreen');
     }

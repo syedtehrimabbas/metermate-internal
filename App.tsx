@@ -22,7 +22,7 @@ function App(): React.JSX.Element {
         backgroundColor: isDarkMode ? Colors.primaryDarkColor : Colors.primaryColor,
     };
     return (
-        <GestureHandlerRootView style={{flex: 1}}>
+        // <GestureHandlerRootView style={{flex: 1}}>
             <Provider store={store}>
                 <SafeAreaProvider>
                     <SafeAreaView/>
@@ -34,7 +34,7 @@ function App(): React.JSX.Element {
                     <SafeAreaView/>
                 </SafeAreaProvider>
             </Provider>
-        </GestureHandlerRootView>
+        // </GestureHandlerRootView>
     );
 }
 
