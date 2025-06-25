@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
-    
+    <uses-permission android:name="com.android.vending.BILLING" />
 
     <application
       android:name=".MainApplication"
@@ -39,7 +39,7 @@
         </intent-filter>
       </activity>
 
-      <!-- Removing this activity and its intent filters because two apps are 
+      <!-- Removing this activity and its intent filters because two apps are
       shown with scheme myapp during social login-->
       <activity
         android:name="net.openid.appauth.RedirectUriReceiverActivity"

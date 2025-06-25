@@ -62,8 +62,8 @@ const LoginScreen = ({ navigation }: Props) => {
         password: password,
       })
       .then(async authResponse => {
-        const { data, error } = authResponse;
-        const { user, session } = data;
+        const {data, error} = authResponse;
+        const {user, session} = data;
         if (error) {
           console.log(error);
           Alert.alert(
@@ -73,7 +73,7 @@ const LoginScreen = ({ navigation }: Props) => {
         } else {
           try {
             // Fetch additional user data from 'user_profiles' table
-            const { data: profileData, error: profileError } = await supabase
+            const {data: profileData, error: profileError} = await supabase
               .from('user_profiles')
               .select('*')
               .eq('id', user.id)
@@ -92,7 +92,6 @@ const LoginScreen = ({ navigation }: Props) => {
           } catch (e) {
             console.log('Error during post-login handling:', e);
           }
-
         }
       })
       .catch(error => {
@@ -105,7 +104,6 @@ const LoginScreen = ({ navigation }: Props) => {
         setLoading(false);
       });
   }
-
   return (
     <AppContainer
       loading={loading}
