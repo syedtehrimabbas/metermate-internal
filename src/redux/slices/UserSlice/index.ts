@@ -2,6 +2,19 @@ import type {PayloadAction} from '@reduxjs/toolkit';
 import {createSlice} from '@reduxjs/toolkit';
 import MeterMateEncryptedStorage from '../../../LocalStorage';
 
+export type SubscriptionStatus = 'active' | 'expired' | 'cancelled';
+
+export interface SubscriptionHistoryItem {
+  productId: string;
+  purchaseTime: number;
+  status: SubscriptionStatus;
+}
+
+export interface SubscriptionState {
+  activeSubscription: 'monthly' | 'yearly' | null;
+  subscriptionHistory: SubscriptionHistoryItem[];
+}
+
 export interface AuthenticationState {
   userObject: {
     access_token: string;
@@ -29,6 +42,7 @@ export interface AuthenticationState {
       };
     };
   };
+  subscription: SubscriptionState;
 }
 
 const getInitState = () => {
@@ -61,6 +75,10 @@ const getInitState = () => {
 };
 const initialState: AuthenticationState = {
   userObject: getInitState(),
+  subscription: {
+    activeSubscription: null,
+    subscriptionHistory: [],
+  },
 };
 
 export const userSlice = createSlice({
@@ -81,8 +99,34 @@ export const userSlice = createSlice({
       state.userObject = getInitState();
       MeterMateEncryptedStorage.clearAll().then(r => {});
     },
+    updateSubscription: (
+      state,
+      action: PayloadAction<{
+        activeSubscription: 'monthly' | 'yearly' | null;
+        history?: SubscriptionHistoryItem[];
+      }>,
+    ) => {
+      state.subscription.activeSubscription = action.payload.activeSubscription;
+      if (action.payload.history) {
+        state.subscription.subscriptionHistory = action.payload.history;
+      }
+      MeterMateEncryptedStorage.setItem(
+        MeterMateEncryptedStorage.SUBSCRIPTION_KEY,
+        state.subscription,
+      );
+    },
+    clearSubscription: state => {
+      state.subscription = {
+        activeSubscription: null,
+        subscriptionHistory: [],
+      };
+      MeterMateEncryptedStorage.removeItem(
+        MeterMateEncryptedStorage.SUBSCRIPTION_KEY,
+      );
+    },
   },
 });
-export const {updateUser, clearUser} = userSlice.actions;
+export const {updateUser, clearUser, updateSubscription, clearSubscription} =
+  userSlice.actions;
 
 export default userSlice.reducer;

@@ -11,14 +11,13 @@ import { useDispatch } from 'react-redux';
 import { updateUser } from '../../redux';
 import { supabase } from '../../utils/supabase.ts';
 import AppContainer from '../../components/AppContainer';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type Props = {
   navigation: any;
 };
 const LoginScreen = ({ navigation }: Props) => {
-  const [email, Email] = useState('test@gmail.com');
-  const [password, Password] = useState('Hello786@');
+  const [email, Email] = useState('');
+  const [password, Password] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 

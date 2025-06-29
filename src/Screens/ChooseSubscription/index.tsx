@@ -1,6 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {
-  Alert,
   Image,
   Platform,
   StyleSheet,
@@ -17,13 +16,13 @@ import {AppButton} from '../../components/AppButton.js';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import PaymentCompletedScreen from '../PaymentCompleted';
 import {
-  flushFailedPurchasesCachedAsPendingAndroid,
   getSubscriptions,
-  initConnection,
+  PurchaseError,
   purchaseErrorListener,
   purchaseUpdatedListener,
   requestSubscription,
 } from 'react-native-iap';
+import {CommonActions} from "@react-navigation/native";
 
 type FeatureProps = {
   title: string;
@@ -41,6 +40,7 @@ const FeatureRow: React.FC<FeatureProps> = ({title}) => {
     </View>
   );
 };
+
 type PackageProps = {
   onPress: () => void;
   price: string;
@@ -48,6 +48,7 @@ type PackageProps = {
   type: string;
   selected: boolean;
 };
+
 const PackageItem: React.FC<PackageProps> = ({
   onPress,
   price,
@@ -81,60 +82,64 @@ const PackageItem: React.FC<PackageProps> = ({
         <Text style={styles.annualPlanOffers}>
           {type + ' plan offers you:'}
         </Text>
-        <FeatureRow title={'Feature name that’s included'} />
-        <FeatureRow title={'Feature name that’s included'} />
-        <FeatureRow title={'Feature name that’s included'} />
-        <FeatureRow title={'Feature name that’s included'} />
+        <FeatureRow title={'Feature name thats included'} />
+        <FeatureRow title={'Feature name thats included'} />
+        <FeatureRow title={'Feature name thats included'} />
+        <FeatureRow title={'Feature name thats included'} />
       </View>
     </TouchableOpacity>
   );
 };
-type Props = {
+
+type ChooseSubscriptionScreenProps = {
+  route?: {
+    params?: {
+      returnToDashboard?: boolean;
+    };
+  };
   navigation: any;
 };
 
-const ChooseSubscriptionScreen = ({navigation}: Props) => {
+const ChooseSubscriptionScreen = ({
+  route,
+  navigation,
+}: ChooseSubscriptionScreenProps) => {
+  const shouldReturnToDashboard = route?.params?.returnToDashboard ?? false;
   const [selectedPackage, SelectPackage] = useState('annual');
   const paymentSheetRef = useRef();
-  const [subscriptionsData, setSubscriptionsData] = useState([]);
+  const [productsData, setProductsData] = useState([]);
+  const productIds = {
+    android: ['com.metermate.annual', 'metermate_monthly'],
+    ios: ['com.metermate.annual', 'metermate_monthly'],
+  };
+
   const yearlyData = {
     price: 180,
     subscriptionType: 'Yearly',
     description: 'Annual Subscription',
   };
+
   const monthlyData = {
     price: 20,
     subscriptionType: 'Monthly',
     description: 'Monthly Subscription',
   };
+
   const purchaseUpdateSubscription = useRef(null);
   const purchaseErrorSubscription = useRef(null);
-  const establishConnection = async () => {
+  const initialize = async () => {
     try {
-      await initConnection();
-      if (Platform.OS === 'android') {
-        await flushFailedPurchasesCachedAsPendingAndroid();
-      }
+      await getAllProducts();
     } catch (error) {
-      console.error('Error in fetchData:', error);
+      console.error('Initialization error:', error);
     }
   };
-
   useEffect(() => {
-    const initialize = async () => {
-      try {
-        await establishConnection();
-        await getAllSubscriptions();
-      } catch (error) {
-        console.error('Initialization error:', error);
-      }
-    };
-
     initialize();
     return cleanupSubscriptions;
   }, []);
 
-  // Set up listeners using useRef
+  // Set up listeners
   useEffect(() => {
     purchaseUpdateSubscription.current =
       purchaseUpdatedListener(handlePurchaseUpdate);
@@ -154,14 +159,40 @@ const ChooseSubscriptionScreen = ({navigation}: Props) => {
     };
   }, []);
 
-  const handlePurchaseUpdate = async purchase => {
-    console.log('purchaseUpdatedListener', purchase);
-    const receipt = purchase.transactionReceipt;
-  };
-  /* Handle purchase Error*/
+  // Handle successful purchase
+    const handlePurchaseUpdate = async (purchase) => {
+        console.log('Purchase successful:', purchase);
+
+        try {
+            // Verify receipt on your server here if needed
+            const receipt = purchase.transactionReceipt;
+
+            // Close payment sheet
+            paymentSheetRef.current?.close();
+
+            if (shouldReturnToDashboard) {
+                // Return directly to Dashboard
+                navigation.dispatch(
+                    CommonActions.reset({
+                        index: 0,
+                        routes: [{ name: 'Dashboard' }],
+                    })
+                );
+            } else {
+                navigation.navigate('PaymentCompletedScreen');
+            }
+
+        } catch (error) {
+            console.error('Error handling purchase:', error);
+        }
+    };
+
+  // Handle purchase errors
   const handlePurchaseError = error => {
-    console.warn('purchaseErrorListener', error);
+    console.warn('Purchase error:', error);
+    // Show error message to user if needed
   };
+
   const cleanupSubscriptions = () => {
     if (purchaseUpdateSubscription.current) {
       purchaseUpdateSubscription.current.remove();
@@ -173,52 +204,87 @@ const ChooseSubscriptionScreen = ({navigation}: Props) => {
       purchaseErrorSubscription.current = null;
     }
   };
-  const getAllSubscriptions = async () => {
+
+  // Get all available products
+  const getAllProducts = async () => {
     try {
-      const subscriptions = await getSubscriptions({
-        skus: ['metermate_year', 'test_subscription'],
-      });
-      if (subscriptions.length === 0) {
-        console.warn('Subscription not found');
+      const ids =
+        Platform.OS === 'android' ? [...productIds.android] : productIds.ios;
+
+      const products = await getSubscriptions({skus: ids});
+
+      if (products.length === 0) {
+        console.warn('Products not found');
         return;
       }
-      console.info('Subscriptions data',subscriptions);
-      setSubscriptionsData(subscriptions);
+
+      console.log('Available products:', products);
+      setProductsData(products);
     } catch (error) {
-      console.error('Error in getAllSubscriptions:', error);
+      console.error('Error getting products:', error);
     }
   };
 
+  // SUBSCRIPTION LOGIC (COMMENTED OUT FOR FUTURE USE)
+
   const requestYearlySubscription = async () => {
     try {
-      const subscription = subscriptionsData[0];
-      const offerToken = subscription.subscriptionOfferDetails?.[0]?.offerToken;
+      const subscription = productsData[0];
+      const subscriptionOfferDetails =
+        subscription.subscriptionOfferDetails?.[0];
+      const productId = subscription.productId;
+      const offerToken = subscriptionOfferDetails.offerToken;
 
       if (!offerToken) {
         console.warn('No offer token found');
         return;
       }
 
-      await handleBuySubscription(subscription.productId, offerToken);
+      await handleBuySubscription(productId, offerToken);
     } catch (err) {
       console.warn('Subscription error', err);
     }
   };
 
-  const handleBuySubscription = async (sku: string, offerToken: string) => {
+  const requestMonthlySubscription = async () => {
     try {
-      const result = await requestSubscription({
-        sku,
-        ...(Platform.OS === 'android' && {
-          subscriptionOffers: [{sku, offerToken}],
+      if (productsData.length === 0) {
+        console.warn('Products not found');
+        initialize();
+      }
+      const subscription = productsData[1];
+      const subscriptionOfferDetails =
+        subscription.subscriptionOfferDetails?.[0];
+      const productId = subscription.productId;
+      const offerToken = subscriptionOfferDetails.offerToken;
+
+      if (!offerToken) {
+        console.warn('No offer token found');
+        return;
+      }
+
+      await handleBuySubscription(productId, offerToken);
+    } catch (err) {
+      console.warn('Subscription error', err);
+    }
+  };
+
+  const handleBuySubscription = async (
+    productId: string,
+    offerToken: string,
+  ) => {
+    try {
+      await requestSubscription({
+        sku: productId,
+        ...(offerToken && {
+          subscriptionOffers: [{sku: productId, offerToken}],
         }),
       });
-      console.log('Purchase result:', result);
-    } catch (err) {
-      console.error('Purchase failed:', err);
-      if (err.code === 'E_ITEM_UNAVAILABLE') {
-        // Handle unavailable item specifically
-        Alert.alert('Subscription not available', 'Please try again later');
+    } catch (error) {
+      if (error instanceof PurchaseError) {
+        console.log({message: `[${error.code}]: ${error.message}`, error});
+      } else {
+        console.log({message: 'handleBuySubscription error', error});
       }
     }
   };
@@ -288,10 +354,7 @@ const ChooseSubscriptionScreen = ({navigation}: Props) => {
           animationType: 'slide',
           statusBarTranslucent: true,
         }}>
-        <View
-          style={{
-            backgroundColor: colors.white,
-          }}>
+        <View style={{backgroundColor: colors.white}}>
           <View
             style={{
               flexDirection: 'row',
@@ -332,6 +395,7 @@ const ChooseSubscriptionScreen = ({navigation}: Props) => {
               />
             </TouchableOpacity>
           </View>
+
           <Text style={styles.paymentPlanText1}>{`Are you sure to pay ${
             selectedPackage === 'annual' ? yearlyData.price : monthlyData.price
           }$ for ${
@@ -339,10 +403,13 @@ const ChooseSubscriptionScreen = ({navigation}: Props) => {
               ? yearlyData.description
               : monthlyData.description
           }`}</Text>
+
           <TouchableOpacity
-            onPress={() => {
-              requestYearlySubscription();
-            }}
+            onPress={
+              selectedPackage === 'annual'
+                ? requestYearlySubscription
+                : requestMonthlySubscription
+            }
             style={{
               marginTop: 20,
               width: wp(50),
@@ -377,25 +444,11 @@ const ChooseSubscriptionScreen = ({navigation}: Props) => {
               {Platform.OS === 'android' ? 'Google Pay' : 'Apple pay'}
             </Text>
           </TouchableOpacity>
-
-          <AppButton
-            onPress={() => {
-              paymentSheetRef.current?.close();
-              /// open payment complete screen
-              navigation.navigate(PaymentCompletedScreen);
-            }}
-            width={wp(80)}
-            height={50}
-            label={'Pay Now'}
-            textColor={colors.black}
-            backgroundColor={colors.accentColor}
-            styles={{
-              marginTop: 80,
-            }}
-          />
         </View>
       </RBSheet>
 
+      {/*paymentSheetRef.current?.close();
+        navigation.navigate(PaymentCompletedScreen);*/}
       <AppButton
         onPress={() => paymentSheetRef.current?.open()}
         width={wp(90)}
@@ -407,6 +460,7 @@ const ChooseSubscriptionScreen = ({navigation}: Props) => {
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     width: '100%',
@@ -489,4 +543,5 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
 });
+
 export default ChooseSubscriptionScreen;

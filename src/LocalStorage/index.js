@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 class MeterMateEncryptedStorage {
   static USER_KEY = 'user';
   static JWT_KEY = 'jwt';
+  static SUBSCRIPTION_KEY = 'user_subscription';
 
   static async setItem(key, value) {
     try {

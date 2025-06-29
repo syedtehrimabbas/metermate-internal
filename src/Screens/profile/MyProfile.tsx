@@ -53,7 +53,7 @@ const MyProfileScreen = ({ navigation }: Props) => {
         styles.container
     } source={AppImages.lines_vector} resizeMode={'cover'}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Pressable style={styles.parent} onPress={() => {
+            <Pressable style={{width:30,height:30,padding:5}} onPress={() => {
                 navigation.goBack();
             }}>
                 <Image style={styles.icon} resizeMode="cover" source={AppImages.ic_cross} />
@@ -101,7 +101,7 @@ const MyProfileScreen = ({ navigation }: Props) => {
                     <Text style={styles.tileTitle}>Account</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.tileView}>
+                <TouchableOpacity style={styles.tileView} onPress={()=>navigation.navigate('SubscriptionScreen')}>
                     <View style={[styles.rectangleView, { backgroundColor: '#91f68f' }]}>
                         <Image style={{ width: 24, height: 24 }} source={AppImages.ic_wallet} />
                     </View>
@@ -146,7 +146,6 @@ const styles = StyleSheet.create({
         height: '100%',
         overflow: 'hidden',
         width: '100%',
-        backgroundColor: 'rgba(151, 148, 148, 0.46)',
     },
     loader: {
         position: 'absolute',

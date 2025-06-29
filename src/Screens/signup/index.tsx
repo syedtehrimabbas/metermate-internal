@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, {useRef, useState} from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -12,24 +12,29 @@ import {
   View,
 } from 'react-native';
 import colors from '../../theme/colors';
-import { AppFonts } from '../../fonts';
-import { AppImages } from '../../images';
-import { AppInput } from '../../components/AppInput.js';
-import { scaledFontWidth } from '../../utils/AppUtils.js';
-import { AppButton } from '../../components/AppButton.js';
-import { wp } from '../../utils/Dimension.js';
-import { supabase } from '../../utils/supabase.ts';
+import {AppFonts} from '../../fonts';
+import {AppImages} from '../../images';
+import {AppInput} from '../../components/AppInput.js';
+import {scaledFontWidth} from '../../utils/AppUtils.js';
+import {AppButton} from '../../components/AppButton.js';
+import {wp} from '../../utils/Dimension.js';
+import {supabase} from '../../utils/supabase.ts';
 import AppContainer from '../../components/AppContainer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useDispatch } from 'react-redux';
-import { updateUser } from '../../redux';
-import { openSettings, PERMISSIONS, request, RESULTS } from 'react-native-permissions';
-import { Asset, launchImageLibrary } from 'react-native-image-picker';
+import {useDispatch} from 'react-redux';
+import {updateUser} from '../../redux';
+import {
+  openSettings,
+  PERMISSIONS,
+  request,
+  RESULTS,
+} from 'react-native-permissions';
+import {Asset, launchImageLibrary} from 'react-native-image-picker';
 
 type Props = {
   navigation: any;
 };
-const SignupScreen = ({ navigation }: Props) => {
+const SignupScreen = ({navigation}: Props) => {
   const [email, Email] = useState('');
   const [name, Name] = useState('');
   const [password, Password] = useState('');
@@ -42,16 +47,15 @@ const SignupScreen = ({ navigation }: Props) => {
 
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
-  const [imageSource, setImageSource] = useState(!imageError && ''
-    ? { uri: '' }
-    : AppImages.signup_image_ph);
+  const [imageSource, setImageSource] = useState(
+    !imageError && '' ? {uri: ''} : AppImages.signup_image_ph,
+  );
 
   const emailInputRef = useRef(null);
   const passwordIRef = useRef(null);
   const cPasswordIRef = useRef(null);
   const promoRef = useRef(null);
   const dispatch = useDispatch();
-
 
   const requestAllPermissions = async () => {
     if (Platform.OS !== 'android') return true;
@@ -93,16 +97,18 @@ const SignupScreen = ({ navigation }: Props) => {
 
     // const result = await requestMultiple(permissions);
 
-    const allGranted = Object.values(statuses).every(status => status === RESULTS.GRANTED);
+    const allGranted = Object.values(statuses).every(
+      status => status === RESULTS.GRANTED,
+    );
 
     if (!allGranted) {
       Alert.alert(
         'Permissions Needed',
         'Please grant all required permissions to continue using this feature.',
         [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Open Settings', onPress: () => openSettings() },
-        ]
+          {text: 'Cancel', style: 'cancel'},
+          {text: 'Open Settings', onPress: () => openSettings()},
+        ],
       );
     }
 
@@ -112,12 +118,22 @@ const SignupScreen = ({ navigation }: Props) => {
   const handleImagePicker = async () => {
     const hasPermission = await requestAllPermissions();
     if (!hasPermission) {
-      Alert.alert('Permission denied', 'Storage permission is required to select an image.');
+      Alert.alert(
+        'Permission denied',
+        'Storage permission is required to select an image.',
+      );
       return;
     }
 
-    const response = await launchImageLibrary({ mediaType: 'photo', selectionLimit: 1 });
-    if (response.didCancel || !response.assets || response.assets.length === 0) {
+    const response = await launchImageLibrary({
+      mediaType: 'photo',
+      selectionLimit: 1,
+    });
+    if (
+      response.didCancel ||
+      !response.assets ||
+      response.assets.length === 0
+    ) {
       return;
     }
 
@@ -126,8 +142,7 @@ const SignupScreen = ({ navigation }: Props) => {
 
     setPickedImage(imageAsset);
     // setProfileImage(imageAsset.uri);
-    setImageSource({ uri: imageAsset.uri });
-
+    setImageSource({uri: imageAsset.uri});
   };
 
   async function signUpWithEmail() {
@@ -173,15 +188,14 @@ const SignupScreen = ({ navigation }: Props) => {
         password: password,
       })
       .then(async response => {
-        const { user, session } = response.data;
+        const {user, session} = response.data;
 
         if (user) {
-
           // console.log('Continue, user is valid');
           if (pickedImage) {
             // If an image is picked, upload it
             await uploadProfileImage(user, session)
-              .then(async (imageUrl) => {
+              .then(async imageUrl => {
                 if (imageUrl) {
                   // If image upload is successful, store user data
                   const localUserData = {
@@ -191,9 +205,9 @@ const SignupScreen = ({ navigation }: Props) => {
                     promo_code: promoCode,
                     profile_photo: imageUrl, // Use the uploaded image URL
                   };
-                  const { error: insertError } = await supabase.from('user_profiles').insert([
-                    localUserData,
-                  ]);
+                  const {error: insertError} = await supabase
+                    .from('user_profiles')
+                    .insert([localUserData]);
 
                   if (insertError) {
                     Alert.alert('Error saving user data:', insertError.message);
@@ -203,19 +217,19 @@ const SignupScreen = ({ navigation }: Props) => {
 
                     // console.log('localUserData found with image:', localUserData);
                     // dispatch(updateUser(session));
-
-                    navigation.navigate('ChooseSubscriptionScreen');
+                    navigation.navigate('ChooseSubscriptionScreen', {
+                      returnToDashboard: false,
+                    });
                   }
-                }
-                else {
+                } else {
                   //if failed to upload image or retrieve image URL
-                  await storeUserDataWithoutImage(user, session)
+                  await storeUserDataWithoutImage(user, session);
                 }
               })
               .catch(async error => {
                 console.error('Error uploading profile image:', error);
                 // Alert.alert('Error uploading profile image:', error.message);
-                await storeUserDataWithoutImage(user, session)
+                await storeUserDataWithoutImage(user, session);
               });
           } else {
             // If no image is picked
@@ -248,13 +262,13 @@ const SignupScreen = ({ navigation }: Props) => {
     const imageFile = {
       uri: fileUri,
       name: fileName,
-      type: fileType
+      type: fileType,
     };
     console.log('Image file:', imageFile);
 
     try {
       // Upload image to Supabase storage
-      const { data, error } = await supabase.storage
+      const {data, error} = await supabase.storage
         .from(bucketName) // make sure this bucket exists
         .upload(user.id + '/' + fileName, imageFile, {
           cacheControl: '3600',
@@ -270,7 +284,7 @@ const SignupScreen = ({ navigation }: Props) => {
       // console.log('Image uploaded successfully:', data);
 
       // Get the public URL of the uploaded image
-      const { data: publicUrlData } = await supabase.storage
+      const {data: publicUrlData} = await supabase.storage
         .from(bucketName)
         .getPublicUrl(data.path);
       if (!publicUrlData) {
@@ -282,13 +296,12 @@ const SignupScreen = ({ navigation }: Props) => {
       console.log('Image public URL:', publicUrl);
       // Return the public URL of the uploaded image
       return publicUrl;
-
     } catch (err) {
       console.error(err);
       // Alert.alert('Error', err.message || 'Something went wrong.');
       return null; // Return null if there was an error
     }
-  }
+  };
 
   const storeUserDataWithoutImage = async (user, session) => {
     // Insert additional user data into the 'users' table
@@ -299,9 +312,9 @@ const SignupScreen = ({ navigation }: Props) => {
       promo_code: promoCode,
       profile_photo: '',
     };
-    const { error: insertError } = await supabase.from('user_profiles').insert([
-      localUserData,
-    ]);
+    const {error: insertError} = await supabase
+      .from('user_profiles')
+      .insert([localUserData]);
 
     if (insertError) {
       Alert.alert('Error saving user data:', insertError.message);
@@ -312,7 +325,9 @@ const SignupScreen = ({ navigation }: Props) => {
       // console.log('localUserData found no image:', localUserData);
       // dispatch(updateUser(session));
 
-      navigation.navigate('ChooseSubscriptionScreen');
+      navigation.navigate('ChooseSubscriptionScreen', {
+        returnToDashboard: false,
+      });
     }
   };
 
@@ -346,10 +361,14 @@ const SignupScreen = ({ navigation }: Props) => {
             {'Enter your details for sign up.'}
           </Text>
 
-          <View style={{ alignSelf: 'center', marginVertical: 30 }}>
+          <View style={{alignSelf: 'center', marginVertical: 30}}>
             <View style={styles.imageContainer}>
               {imageLoading && !imageError && (
-                <ActivityIndicator style={styles.loader} size="large" color="#888" />
+                <ActivityIndicator
+                  style={styles.loader}
+                  size="large"
+                  color="#888"
+                />
               )}
               <Image
                 style={styles.icon}
@@ -366,11 +385,18 @@ const SignupScreen = ({ navigation }: Props) => {
             <TouchableOpacity
               onPress={() => {
                 handleImagePicker();
-              }}
-            >
+              }}>
               <Image
-                style={{ width: 28, height: 28, resizeMode: 'contain', position: 'absolute', bottom: 0, right: 5 }}
-                source={AppImages.ic_camera} />
+                style={{
+                  width: 28,
+                  height: 28,
+                  resizeMode: 'contain',
+                  position: 'absolute',
+                  bottom: 0,
+                  right: 5,
+                }}
+                source={AppImages.ic_camera}
+              />
             </TouchableOpacity>
           </View>
           {/* <View style={{ alignSelf: 'center', marginVertical: 30 }}>
@@ -504,9 +530,9 @@ const SignupScreen = ({ navigation }: Props) => {
                   textAlign: 'center',
                 }}>
                 {'I agree with'}
-                <Text style={{ color: colors.black }}>{' Terms'}</Text>
+                <Text style={{color: colors.black}}>{' Terms'}</Text>
                 <Text>{' and'}</Text>
-                <Text style={{ color: colors.black }}>{' Privacy'}</Text>
+                <Text style={{color: colors.black}}>{' Privacy'}</Text>
               </Text>
             </View>
 

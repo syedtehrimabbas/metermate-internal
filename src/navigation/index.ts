@@ -8,21 +8,24 @@ import PaymentCompletedScreen from '../Screens/PaymentCompleted';
 import SearchElectricProviders from '../Screens/dashboard/searchproviders';
 import MyProfileScreen from '../Screens/profile/MyProfile.tsx';
 import EditProfileScreen from '../Screens/profile/edit_profile';
-import ProviderDetailsScreen from "../Screens/dashboard/providerDetails";
+import ProviderDetailsScreen from '../Screens/dashboard/providerDetails';
+import {SubscriptionScreen} from "../Screens/subscriptions";
 
 const AuthenticationStack = {
-    LoginScreen,
-    SocialLogin,
-    SignupScreen,
-    ChooseSubscriptionScreen,
-    PaymentCompletedScreen,
+  LoginScreen,
+  SocialLogin,
+  SignupScreen,
+  ChooseSubscriptionScreen,
+  PaymentCompletedScreen,
 };
 const AppStack = {
     Dashboard,
     SearchElectricProviders,
     MyProfileScreen,
     EditProfileScreen,
-    ProviderDetailsScreen
+    ProviderDetailsScreen,
+    ChooseSubscriptionScreen,
+    SubscriptionScreen,
 };
 
 const SplashStack = {
