@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "products": [
+    {
+      "identifier": "com.metermate.annual",
+      "type": "autoRenewable",
+      "displayName": "MeterMate Annual",
+      "description": "Annual subscription to MeterMate",
+      "price": 49.99,
+      "locale": "en_US",
+      "subscriptionGroupIdentifier": "com.metermate.subscriptions",
+      "subscriptionPeriod": "year",
+      "introductoryOffer": {
+        "price": 29.99,
+        "period": "week",
+        "periodCount": 1,
+        "paymentMode": "payAsYouGo"
+      }
+    },
+    {
+      "identifier": "com.metermate.monthly",
+      "type": "autoRenewable",
+      "displayName": "MeterMate Monthly",
+      "description": "Monthly subscription to MeterMate",
+      "price": 5.99,
+      "locale": "en_US",
+      "subscriptionGroupIdentifier": "com.metermate.subscriptions",
+      "subscriptionPeriod": "month",
+      "introductoryOffer": {
+        "price": 2.99,
+        "period": "month",
+        "periodCount": 1,
+        "paymentMode": "payAsYouGo"
+      }
+    }
+  ],
+  "rules": [
+    {
+      "id": "initialPurchase",
+      "description": "Test initial purchase flow",
+      "productIdentifiers": ["com.metermate.annual", "com.metermate.monthly"],
+      "action": "start"
+    },
+    {
+      "id": "renewal",
+      "description": "Test subscription renewal",
+      "productIdentifiers": ["com.metermate.annual", "com.metermate.monthly"],
+      "action": "renew"
+    },
+    {
+      "id": "cancel",
+      "description": "Test subscription cancellation",
+      "productIdentifiers": ["com.metermate.annual", "com.metermate.monthly"],
+      "action": "cancel"
+    }
+  ]
+}

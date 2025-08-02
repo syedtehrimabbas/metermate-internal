@@ -135,6 +135,7 @@ const SocialLogin = ({navigation}: Props) => {
       // You can use Linking to open the URL in the browser
       Linking.openURL(data.url);
     }
+    setLoading(false);
   };
 
   const storeUserData = async (user, session) => {

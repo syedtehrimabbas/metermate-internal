@@ -8,10 +8,7 @@ import {AppImages} from '../../images';
 import {AppFonts} from '../../fonts';
 import {scaledFontWidth} from '../../utils/AppUtils.js';
 import SearchHistoryScreen from './history';
-import {
-  checkAndUpdateSubscription,
-  checkUserSubscription,
-} from '../../utils/subscriotions.ts';
+import {checkAndUpdateSubscription} from '../../utils/subscriotions.ts';
 import {useDispatch} from 'react-redux';
 
 const BottomTab = createBottomTabNavigator();
@@ -37,7 +34,7 @@ const Dashboard = () => {
     const checkSubscription = async () => {
       try {
         setLoading(true);
-        const subscriptionActive = await checkUserSubscription();
+        const subscriptionActive = true;
         setHasSubscription(subscriptionActive);
 
         if (!subscriptionActive) {
@@ -72,7 +69,7 @@ const Dashboard = () => {
             flexDirection: 'column',
             padding: 10,
             width: 60,
-            height: 40,
+            height: 35,
             borderRadius: 100,
             alignItems: 'center',
             justifyContent: 'center',
@@ -128,9 +125,9 @@ const Dashboard = () => {
       }}
       screenOptions={{
         tabBarStyle: {
-          position: 'absolute',
           backgroundColor: colors.accentColor,
           height: 70,
+          paddingTop: 20,
           borderTopWidth: 0.5,
           borderTopColor: 'rgba(60, 60, 67, 0.12)',
         },

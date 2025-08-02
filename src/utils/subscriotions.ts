@@ -1,36 +1,60 @@
 import {getPurchaseHistory} from 'react-native-iap';
 import {SubscriptionHistoryItem, SubscriptionStatus, updateSubscription} from '../redux';
+import {Platform} from "react-native";
 
 export const checkUserSubscription = async () => {
     try {
-        // Get purchase history
         const purchases = await getPurchaseHistory();
         // console.log('Purchase history:', JSON.stringify(purchases, null, 2));
 
-        // Check for active monthly or yearly subscription
         return purchases.some(purchase => {
             try {
-                // Parse the Android-specific data if available
-                const androidData = purchase.dataAndroid
-                    ? JSON.parse(purchase.dataAndroid)
-                    : null;
+                const platform = Platform.OS;
 
-                // Determine product ID (fallback to direct property)
-                const productId = androidData?.productId || purchase.productId;
+                let productId: string | undefined;
+                let isActive = false;
 
-                // Check if purchase is active
-                const isActive = (
-                    purchase.purchaseStateAndroid === 1 || // Purchased
-                    purchase.purchaseState === 'Purchased' ||
-                    purchase.purchaseState === 'Restored' ||
-                    (androidData && Date.now() < androidData.purchaseTime + 30 * 24 * 60 * 60 * 1000) // Within 30 days
-                );
+                // Android-specific
+                if (platform === 'android') {
+                    const androidData = purchase.dataAndroid
+                        ? JSON.parse(purchase.dataAndroid)
+                        : null;
 
-                // Check for valid subscriptions
+                    productId = androidData?.productId || purchase.productId;
+
+                    isActive =
+                        purchase.purchaseStateAndroid === 1 || // Purchased
+                        purchase.purchaseState === 'Purchased' ||
+                        purchase.purchaseState === 'Restored' ||
+                        (androidData && Date.now() < androidData.purchaseTime + 30 * 24 * 60 * 60 * 1000); // Within 30 days
+                }
+
+                // iOS-specific
+                else if (platform === 'ios') {
+                    console.log("here")
+                    productId = purchase.productId;
+
+                    // For StoreKit2, check ownership status or expiry if available
+                    if ('ownershipType' in purchase) {
+                        isActive =
+                            purchase.ownershipType === 'PURCHASED' || purchase.ownershipType === 'FAMILY_SHARED';
+                    } else if ('transactionDate' in purchase) {
+                        const purchaseTime = Number(purchase.transactionDate);
+                        const expirationTime = purchase.expirationDate
+                            ? Number(purchase.expirationDate)
+                            : purchaseTime + 30 * 24 * 60 * 60 * 1000; // Fallback
+
+                        isActive = Date.now() < expirationTime;
+                    } else {
+                        // Fallback if no known fields exist
+                        isActive = true;
+                    }
+                }
+
                 const isValidSubscription = [
                     'metermate_monthly',
                     'com.metermate.yearly',
-                ].includes(productId);
+                ].includes(productId || '');
 
                 return isActive && isValidSubscription;
             } catch (e) {

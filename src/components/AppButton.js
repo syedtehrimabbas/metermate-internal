@@ -1,5 +1,5 @@
 import React from 'react';
-import {Text, TouchableOpacity} from 'react-native';
+import {Platform, Text, TouchableOpacity} from 'react-native';
 import colors from '../theme/colors';
 import {AppFonts} from '../fonts';
 import {getScaledHeight} from '../utils/AppUtils';
@@ -31,9 +31,9 @@ export const AppButton = ({
                     alignSelf: 'center',
                     shadowOpacity: 0.5,
                     elevation: 1,
-                    shadowRadius: 15,
+                    shadowRadius: Platform.OS === 'ios' ? 3 : 15,
                     /* Brand */
-                    shadowOffset: {width: 1, height: 13},
+                    shadowOffset: {width: 1, height: Platform.OS === 'ios' ? 2 : 13},
                     opacity: isDisable ? 0.5 : 1, // Adjust opacity based on isDisable prop
                 },
                 styles,

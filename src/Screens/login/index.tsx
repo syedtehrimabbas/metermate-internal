@@ -1,32 +1,45 @@
-import React, { useRef, useState } from 'react';
-import { Alert, Image, StyleSheet, Text, View } from 'react-native';
+import React, {useRef, useState} from 'react';
+import {
+  Alert,
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 import colors from '../../theme/colors';
-import { AppFonts } from '../../fonts';
-import { AppImages } from '../../images';
-import { AppInput } from '../../components/AppInput.js';
-import { getScaledHeight, scaledFontWidth } from '../../utils/AppUtils.js';
-import { AppButton } from '../../components/AppButton.js';
-import { wp } from '../../utils/Dimension.js';
-import { useDispatch } from 'react-redux';
-import { updateUser } from '../../redux';
-import { supabase } from '../../utils/supabase.ts';
+import {AppFonts} from '../../fonts';
+import {AppImages} from '../../images';
+import {AppInput} from '../../components/AppInput.js';
+import {getScaledHeight, scaledFontWidth} from '../../utils/AppUtils.js';
+import {AppButton} from '../../components/AppButton.js';
+import {wp} from '../../utils/Dimension.js';
+import {useDispatch} from 'react-redux';
+import {updateUser} from '../../redux';
+import {supabase} from '../../utils/supabase.ts';
 import AppContainer from '../../components/AppContainer';
 
 type Props = {
   navigation: any;
 };
-const LoginScreen = ({ navigation }: Props) => {
-  const [email, Email] = useState('');
-  const [password, Password] = useState('');
+const LoginScreen = ({navigation}: Props) => {
+  // const [email, Email] = useState('');
+  // const [password, Password] = useState('');
+  const [email, Email] = useState('test@gmail.com');
+  const [password, Password] = useState('Hello786@');
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{email?: string; password?: string}>({});
 
   const emailInputRef = useRef(null);
   const passwordIRef = useRef(null);
   const dispatch = useDispatch();
 
   const validateForm = () => {
-    const newErrors: { email?: string; password?: string } = {};
+    Keyboard.dismiss();
+    const newErrors: {email?: string; password?: string} = {};
     let isValid = true;
 
     if (!email.trim()) {
@@ -103,102 +116,112 @@ const LoginScreen = ({ navigation }: Props) => {
         setLoading(false);
       });
   }
+
   return (
     <AppContainer
       loading={loading}
       children={
-        <View style={styles.container}>
-          <Image
-            style={{
-              width: 48,
-              height: 48,
-              resizeMode: 'contain',
-            }}
-            source={AppImages.logo_png}
-          />
-          <Text style={styles.title}>
-            Metermate: Your Energy Efficiency Companion
-          </Text>
-          <Text style={styles.letsMakeEnergy}>
-            Let's make energy management simple and efficient.
-          </Text>
-          <View style={{ width: '100%' }}>
-            <AppInput
-              ref={emailInputRef}
-              placeholder={'Email'}
-              onChangeText={text => {
-                Email(text);
-                if (errors.email) {
-                  setErrors(prev => ({ ...prev, email: undefined }));
-                }
-              }}
-              value={email}
-              keyboardType={'email-address'}
-              returnKeyType="next"
-              onSubmitEditing={() => passwordIRef.current?.focus()}
-            />
-            {errors.email && (
-              <Text style={styles.errorText}>{errors.email}</Text>
-            )}
-          </View>
-          <View style={{ width: '100%' }}>
-            <AppInput
-              ref={passwordIRef}
-              placeholder={'Password'}
-              onChangeText={text => {
-                Password(text);
-                if (errors.password) {
-                  setErrors(prev => ({ ...prev, password: undefined }));
-                }
-              }}
-              value={password}
-              keyboardType={'default'}
-              returnKeyType="done"
-              isPassword={true}
-              onSubmitEditing={signInWithEmail}
-            />
-            {errors.password && (
-              <Text style={styles.errorText}>{errors.password}</Text>
-            )}
-          </View>
-          <Text
-            style={{
-              marginTop: 10,
-              fontFamily: AppFonts.general_regular,
-              alignSelf: 'flex-end',
-              color: colors.black,
-            }}>
-            {'Forgot password?'}
-          </Text>
-
-          <AppButton
-            onPress={signInWithEmail}
-            width={wp(90)}
-            height={50}
-            label={loading ? 'Logging in...' : 'Login'}
-            textColor={colors.black}
-            backgroundColor={
-              loading ? `${colors.accentColor}99` : colors.accentColor
-            }
-            isDisable={loading}
-            styles={{}}
-            borderRadius={50}
-          />
-
-          <View style={styles.rectangleView}>
-            <Text
-              onPress={() => {
-                navigation.navigate('SocialLogin');
-              }}
-              style={styles.dontHaveAn}>
-              {'Don’t have an account? '}{' '}
-              <Text
-                style={{ color: colors.black1, textDecorationLine: 'underline' }}>
-                {'Signup'}
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.container}>
+            <View style={styles.innerContainer}>
+              <Image
+                style={{
+                  width: 48,
+                  height: 48,
+                  resizeMode: 'contain',
+                }}
+                source={AppImages.logo_png}
+              />
+              <Text style={styles.title}>
+                Metermate: Your Energy Efficiency Companion
               </Text>
-            </Text>
-          </View>
-        </View>
+              <Text style={styles.letsMakeEnergy}>
+                Let's make energy management simple and efficient.
+              </Text>
+              <View style={{width: '100%'}}>
+                <AppInput
+                  ref={emailInputRef}
+                  placeholder={'Email'}
+                  onChangeText={text => {
+                    Email(text);
+                    if (errors.email) {
+                      setErrors(prev => ({...prev, email: undefined}));
+                    }
+                  }}
+                  value={email}
+                  keyboardType={'email-address'}
+                  returnKeyType="next"
+                  onSubmitEditing={() => passwordIRef.current?.focus()}
+                />
+                {errors.email && (
+                  <Text style={styles.errorText}>{errors.email}</Text>
+                )}
+              </View>
+              <View style={{width: '100%'}}>
+                <AppInput
+                  ref={passwordIRef}
+                  placeholder={'Password'}
+                  onChangeText={text => {
+                    Password(text);
+                    if (errors.password) {
+                      setErrors(prev => ({...prev, password: undefined}));
+                    }
+                  }}
+                  value={password}
+                  keyboardType={'default'}
+                  returnKeyType="done"
+                  isPassword={true}
+                  onSubmitEditing={signInWithEmail}
+                />
+                {errors.password && (
+                  <Text style={styles.errorText}>{errors.password}</Text>
+                )}
+              </View>
+              {/*<Text*/}
+              {/*  style={{*/}
+              {/*    marginTop: 10,*/}
+              {/*    fontFamily: AppFonts.general_regular,*/}
+              {/*    alignSelf: 'flex-end',*/}
+              {/*    color: colors.black,*/}
+              {/*  }}>*/}
+              {/*  {'Forgot password?'}*/}
+              {/*</Text>*/}
+
+              <AppButton
+                onPress={signInWithEmail}
+                width={wp(90)}
+                height={50}
+                label={loading ? 'Logging in...' : 'Login'}
+                textColor={colors.black}
+                backgroundColor={
+                  loading ? `${colors.accentColor}99` : colors.accentColor
+                }
+                isDisable={loading}
+                styles={{marginTop: 20}}
+                borderRadius={50}
+              />
+
+              <View style={styles.rectangleView}>
+                <Text
+                  onPress={() => {
+                    navigation.navigate('SocialLogin');
+                  }}
+                  style={styles.dontHaveAn}>
+                  {'Dont have an account? '}{' '}
+                  <Text
+                    style={{
+                      color: colors.black1,
+                      textDecorationLine: 'underline',
+                    }}>
+                    {'Signup'}
+                  </Text>
+                </Text>
+              </View>
+            </View>
+          </KeyboardAvoidingView>
+        </TouchableWithoutFeedback>
       }
     />
   );
@@ -210,6 +233,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     flex: 1,
     padding: 20,
+  },
+  innerContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },

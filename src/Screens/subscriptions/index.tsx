@@ -8,7 +8,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {AppImages} from '../../images';
 import {hp} from '../../utils/Dimension';
 import colors from '../../theme/colors';
@@ -17,7 +17,8 @@ import {checkAndUpdateSubscription} from '../../utils/subscriotions.ts';
 
 export const SubscriptionScreen = ({navigation}) => {
   const {subscription} = useSelector((state: any) => state.userInfo);
-  const {
+    const dispatch = useDispatch(); // Access dispatch
+    const {
     activeSubscription = null,
     subscriptionHistory = [],
     isLoading = false, // Default to loading

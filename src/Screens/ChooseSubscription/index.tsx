@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   Image,
   Platform,
@@ -14,15 +14,16 @@ import {AppFonts} from '../../fonts';
 import {hp, wp} from '../../utils/Dimension.js';
 import {AppButton} from '../../components/AppButton.js';
 import RBSheet from 'react-native-raw-bottom-sheet';
-import PaymentCompletedScreen from '../PaymentCompleted';
 import {
+  endConnection,
   getSubscriptions,
+  initConnection,
   PurchaseError,
   purchaseErrorListener,
   purchaseUpdatedListener,
   requestSubscription,
 } from 'react-native-iap';
-import {CommonActions} from "@react-navigation/native";
+import {CommonActions} from '@react-navigation/native';
 
 type FeatureProps = {
   title: string;
@@ -108,9 +109,11 @@ const ChooseSubscriptionScreen = ({
   const [selectedPackage, SelectPackage] = useState('annual');
   const paymentSheetRef = useRef();
   const [productsData, setProductsData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const productIds = {
     android: ['com.metermate.annual', 'metermate_monthly'],
-    ios: ['com.metermate.annual', 'metermate_monthly'],
+    ios: ['com.metermate.annual', 'com.metermate.monthly'], // Added monthly for iOS
   };
 
   const yearlyData = {
@@ -127,18 +130,50 @@ const ChooseSubscriptionScreen = ({
 
   const purchaseUpdateSubscription = useRef(null);
   const purchaseErrorSubscription = useRef(null);
-  const initialize = async () => {
-    try {
-      await getAllProducts();
-    } catch (error) {
-      console.error('Initialization error:', error);
-    }
-  };
+
   useEffect(() => {
-    initialize();
     return cleanupSubscriptions;
   }, []);
+  useEffect(() => {
+    let isMounted = true;
 
+    const initIAP = async () => {
+      try {
+        // Initialize connection
+        await initConnection();
+
+        // Get products
+        const ids =
+          Platform.OS === 'android' ? productIds.android : productIds.ios;
+        console.log('Fetching products with IDs:', ids);
+
+        const products = await getSubscriptions({skus: ids});
+
+        if (isMounted) {
+          if (products.length === 0) {
+            setError('No products found - check your Store configuration');
+          } else {
+            setProductsData(products);
+            console.log('Products loaded:', products);
+          }
+          setIsLoading(false);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(`Failed to load products: ${err.message}`);
+          setIsLoading(false);
+          console.error('IAP Error:', err);
+        }
+      }
+    };
+
+    initIAP();
+
+    return () => {
+      isMounted = false;
+      endConnection();
+    };
+  }, []);
   // Set up listeners
   useEffect(() => {
     purchaseUpdateSubscription.current =
@@ -160,32 +195,31 @@ const ChooseSubscriptionScreen = ({
   }, []);
 
   // Handle successful purchase
-    const handlePurchaseUpdate = async (purchase) => {
-        console.log('Purchase successful:', purchase);
+  const handlePurchaseUpdate = async purchase => {
+    console.log('Purchase successful:', purchase);
 
-        try {
-            // Verify receipt on your server here if needed
-            const receipt = purchase.transactionReceipt;
+    try {
+      // Verify receipt on your server here if needed
+      const receipt = purchase.transactionReceipt;
 
-            // Close payment sheet
-            paymentSheetRef.current?.close();
+      // Close payment sheet
+      paymentSheetRef.current?.close();
 
-            if (shouldReturnToDashboard) {
-                // Return directly to Dashboard
-                navigation.dispatch(
-                    CommonActions.reset({
-                        index: 0,
-                        routes: [{ name: 'Dashboard' }],
-                    })
-                );
-            } else {
-                navigation.navigate('PaymentCompletedScreen');
-            }
-
-        } catch (error) {
-            console.error('Error handling purchase:', error);
-        }
-    };
+      if (shouldReturnToDashboard) {
+        // Return directly to Dashboard
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{name: 'Dashboard'}],
+          }),
+        );
+      } else {
+        navigation.navigate('PaymentCompletedScreen');
+      }
+    } catch (error) {
+      console.error('Error handling purchase:', error);
+    }
+  };
 
   // Handle purchase errors
   const handlePurchaseError = error => {
@@ -205,87 +239,158 @@ const ChooseSubscriptionScreen = ({
     }
   };
 
-  // Get all available products
-  const getAllProducts = async () => {
+  const handleGetProducts = useCallback(async () => {
     try {
+      console.log('[IAP] Starting product fetch...');
+      setIsLoading(true);
+      setError(null);
+
       const ids =
-        Platform.OS === 'android' ? [...productIds.android] : productIds.ios;
+        Platform.OS === 'android' ? productIds.android : productIds.ios;
+      console.log('[IAP] Fetching products with IDs:', ids);
 
       const products = await getSubscriptions({skus: ids});
+      console.log('[IAP] Received products:', products);
 
       if (products.length === 0) {
-        console.warn('Products not found');
+        const errorMsg = 'No products returned - check Store configuration';
+        console.warn('[IAP]', errorMsg);
+        setError(errorMsg);
         return;
       }
 
-      console.log('Available products:', products);
       setProductsData(products);
     } catch (error) {
-      console.error('Error getting products:', error);
+      console.error('[IAP] Error:', error);
+      setError(`Failed: ${error.message}`);
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [productIds]);
 
   // SUBSCRIPTION LOGIC (COMMENTED OUT FOR FUTURE USE)
 
   const requestYearlySubscription = async () => {
     try {
-      const subscription = productsData[0];
-      const subscriptionOfferDetails =
-        subscription.subscriptionOfferDetails?.[0];
-      const productId = subscription.productId;
-      const offerToken = subscriptionOfferDetails.offerToken;
+      if (productsData.length === 0) {
+        console.warn('Products not loaded yet, fetching...');
+        await handleGetProducts();
+        if (productsData.length === 0) {
+          console.warn('Still no products available after refresh');
+          return;
+        }
+      }
 
-      if (!offerToken) {
-        console.warn('No offer token found');
+      // Find the annual subscription (assuming it's the first one in the array)
+      const subscription =
+        productsData.find(
+          p =>
+            p.productId.includes('annual') ||
+            p.productId === 'com.metermate.annual',
+        ) || productsData[0]; // Fallback to first product if not found
+
+      if (!subscription) {
+        console.warn('Yearly subscription not found');
         return;
       }
 
-      await handleBuySubscription(productId, offerToken);
+      // For iOS, we might not need offerToken
+      if (Platform.OS === 'ios') {
+        await handleBuySubscription(subscription.productId);
+      } else {
+        const subscriptionOfferDetails =
+          subscription.subscriptionOfferDetails?.[0];
+        const offerToken = subscriptionOfferDetails?.offerToken;
+
+        if (!offerToken) {
+          console.warn('No offer token found');
+          return;
+        }
+        await handleBuySubscription(subscription.productId, offerToken);
+      }
     } catch (err) {
       console.warn('Subscription error', err);
+      setError(`Failed to process subscription: ${err.message}`);
     }
   };
 
   const requestMonthlySubscription = async () => {
     try {
       if (productsData.length === 0) {
-        console.warn('Products not found');
-        initialize();
+        console.warn('Products not loaded yet, fetching...');
+        await handleGetProducts();
+        if (productsData.length === 0) {
+          console.warn('Still no products available after refresh');
+          return;
+        }
       }
-      const subscription = productsData[1];
-      const subscriptionOfferDetails =
-        subscription.subscriptionOfferDetails?.[0];
-      const productId = subscription.productId;
-      const offerToken = subscriptionOfferDetails.offerToken;
 
-      if (!offerToken) {
-        console.warn('No offer token found');
+      // Find the monthly subscription (assuming it's the second one in the array)
+      const subscription = productsData.find(
+        p =>
+          p.productId.includes('monthly') ||
+          p.productId === 'com.metermate.monthly',
+      );
+
+      if (!subscription) {
+        console.warn('Monthly subscription not found');
         return;
       }
 
-      await handleBuySubscription(productId, offerToken);
+      // For iOS, we might not need offerToken
+      if (Platform.OS === 'ios') {
+        await handleBuySubscription(subscription.productId);
+      } else {
+        const subscriptionOfferDetails =
+          subscription.subscriptionOfferDetails?.[0];
+        const offerToken = subscriptionOfferDetails?.offerToken;
+
+        if (!offerToken) {
+          console.warn('No offer token found');
+          return;
+        }
+        await handleBuySubscription(subscription.productId, offerToken);
+      }
     } catch (err) {
       console.warn('Subscription error', err);
+      setError(`Failed to process subscription: ${err.message}`);
     }
   };
 
   const handleBuySubscription = async (
     productId: string,
-    offerToken: string,
+    offerToken?: string,
   ) => {
     try {
-      await requestSubscription({
+      console.log('Initiating purchase for product:', productId);
+
+      const purchaseParams: any = {
         sku: productId,
-        ...(offerToken && {
-          subscriptionOffers: [{sku: productId, offerToken}],
-        }),
-      });
+      };
+
+      // Only add subscriptionOffers for Android
+      if (Platform.OS === 'android' && offerToken) {
+        purchaseParams.subscriptionOffers = [
+          {
+            sku: productId,
+            offerToken,
+          },
+        ];
+      }
+
+      await requestSubscription(purchaseParams);
     } catch (error) {
+      let errorMessage = 'Failed to process purchase';
+
       if (error instanceof PurchaseError) {
-        console.log({message: `[${error.code}]: ${error.message}`, error});
+        errorMessage = `[${error.code}]: ${error.message}`;
+        console.log({message: errorMessage, error});
       } else {
         console.log({message: 'handleBuySubscription error', error});
       }
+
+      setError(errorMessage);
+      throw error; // Re-throw to allow caller to handle if needed
     }
   };
 
@@ -449,14 +554,39 @@ const ChooseSubscriptionScreen = ({
 
       {/*paymentSheetRef.current?.close();
         navigation.navigate(PaymentCompletedScreen);*/}
-      <AppButton
-        onPress={() => paymentSheetRef.current?.open()}
-        width={wp(90)}
-        height={50}
-        label={'Continue'}
-        textColor={colors.black}
-        backgroundColor={colors.accentColor}
-      />
+      {isLoading ? (
+        <View style={{alignItems: 'center', padding: 20}}>
+          <Text>Loading subscription options...</Text>
+        </View>
+      ) : error ? (
+        <View style={{alignItems: 'center', padding: 20}}>
+          <Text style={{color: 'red', marginBottom: 10}}>{error}</Text>
+          <AppButton
+            onPress={handleGetProducts}
+            width={wp(90)}
+            height={50}
+            label={'Retry Loading Subscriptions'}
+            textColor={colors.black}
+            backgroundColor={colors.accentColor}
+          />
+        </View>
+      ) : (
+        <AppButton
+          onPress={() => {
+            if (productsData.length === 0) {
+              setError('No subscription products available');
+              return;
+            }
+            paymentSheetRef.current?.open();
+          }}
+          width={wp(90)}
+          height={50}
+          label={'Continue'}
+          textColor={colors.black}
+          backgroundColor={colors.accentColor}
+          disabled={productsData.length === 0}
+        />
+      )}
     </View>
   );
 };

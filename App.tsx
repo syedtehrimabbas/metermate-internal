@@ -13,10 +13,12 @@ import {store} from './src/redux';
 import {RootNavigation} from './src/navigation/RootNavigation';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import 'react-native-url-polyfill/auto';
+import {setup} from 'react-native-iap';
 import {
   flushFailedPurchasesCachedAsPendingAndroid,
   initConnection,
 } from 'react-native-iap';
+setup({storekitMode: 'STOREKIT2_MODE'});
 
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
