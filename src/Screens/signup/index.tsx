@@ -1,6 +1,5 @@
 import React, {useRef, useState} from 'react';
 import {
-  ActivityIndicator,
   Alert,
   Image,
   Keyboard,
@@ -30,7 +29,7 @@ import {
   RESULTS,
 } from 'react-native-permissions';
 import {Asset, launchImageLibrary} from 'react-native-image-picker';
-import {updateUser} from "../../redux";
+import {updateUser} from '../../redux';
 
 type Props = {
   navigation: any;
@@ -46,7 +45,6 @@ const SignupScreen = ({navigation}: Props) => {
   const [pickedImage, setPickedImage] = useState<Asset | null>(null);
   // const [profileImage, setProfileImage] = useState<string | undefined>();
 
-  const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
   const [imageSource, setImageSource] = useState(
     !imageError && '' ? {uri: ''} : AppImages.signup_image_ph,
@@ -268,9 +266,8 @@ const SignupScreen = ({navigation}: Props) => {
     console.log('Image file:', imageFile);
 
     try {
-      // Upload image to Supabase storage
       const {data, error} = await supabase.storage
-        .from(bucketName) // make sure this bucket exists
+        .from(bucketName)
         .upload(user.id + '/' + fileName, imageFile, {
           cacheControl: '3600',
           upsert: true,
@@ -279,28 +276,21 @@ const SignupScreen = ({navigation}: Props) => {
 
       if (error) {
         console.error('Error uploading image:', error);
-        // Alert.alert('Error', 'Failed to upload image. Please try again.');
         return;
       }
-      // console.log('Image uploaded successfully:', data);
-
-      // Get the public URL of the uploaded image
       const {data: publicUrlData} = await supabase.storage
         .from(bucketName)
         .getPublicUrl(data.path);
       if (!publicUrlData) {
         console.error('No public URL found for the uploaded image.');
-        // Alert.alert('Error', 'Failed to retrieve image URL. Please try again.');
         return;
       }
       const publicUrl = publicUrlData.publicUrl;
       console.log('Image public URL:', publicUrl);
-      // Return the public URL of the uploaded image
       return publicUrl;
     } catch (err) {
       console.error(err);
-      // Alert.alert('Error', err.message || 'Something went wrong.');
-      return null; // Return null if there was an error
+      return null;
     }
   };
 
@@ -368,31 +358,18 @@ const SignupScreen = ({navigation}: Props) => {
                 {'Enter your details for sign up.'}
               </Text>
 
-              <View style={{alignSelf: 'center', marginVertical: 30}}>
-                <View style={styles.imageContainer}>
-                  {imageLoading && !imageError && (
-                    <ActivityIndicator
-                      style={styles.loader}
-                      size="large"
-                      color="#888"
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  handleImagePicker();
+                }}>
+                <View style={{alignSelf: 'center', marginVertical: 30}}>
+                  <View style={styles.imageContainer}>
+                    <Image
+                      style={styles.icon}
+                      resizeMode="cover"
+                      source={imageSource}
                     />
-                  )}
-                  <Image
-                    style={styles.icon}
-                    resizeMode="cover"
-                    source={imageSource}
-                    onLoadStart={() => setImageLoading(true)}
-                    onLoadEnd={() => setImageLoading(false)}
-                    onError={() => {
-                      setImageLoading(false);
-                      // setImageError(true);
-                    }}
-                  />
-                </View>
-                <TouchableOpacity
-                  onPress={() => {
-                    handleImagePicker();
-                  }}>
+                  </View>
                   <Image
                     style={{
                       width: 28,
@@ -404,8 +381,8 @@ const SignupScreen = ({navigation}: Props) => {
                     }}
                     source={AppImages.ic_camera}
                   />
-                </TouchableOpacity>
-              </View>
+                </View>
+              </TouchableWithoutFeedback>
 
               <AppInput
                 placeholder={'Full Name'}
@@ -464,7 +441,7 @@ const SignupScreen = ({navigation}: Props) => {
 
               <AppInput
                 ref={promoRef}
-                placeholder={'Metermate 10%'}
+                placeholder=""
                 onChangeText={text => PromoCode(text)}
                 value={promoCode}
                 keyboardType={'default'}
@@ -473,15 +450,18 @@ const SignupScreen = ({navigation}: Props) => {
               />
 
               {/* Privacy policy section */}
-              <View
+              <TouchableOpacity
+                onPress={() => {
+                  acceptTerms(!isTermsAccepted);
+                }}
                 style={{
                   width: '100%',
                   flexDirection: 'row',
                   justifyContent: 'flex-start',
                   alignItems: 'center',
-                  marginTop: 20,
+                  marginVertical: 20,
                 }}>
-                <TouchableOpacity
+                <View
                   style={{
                     backgroundColor: isTermsAccepted
                       ? colors.black
@@ -494,20 +474,18 @@ const SignupScreen = ({navigation}: Props) => {
                     alignItems: 'center',
                     marginEnd: 10,
                     borderRadius: 5,
-                  }}
-                  onPress={() => {
-                    acceptTerms(!isTermsAccepted);
                   }}>
-                  <Image
-                    style={{
-                      width: 10,
-                      height: 10,
-                      resizeMode: 'contain',
-                      tintColor: isTermsAccepted ? colors.white : colors.black,
-                    }}
-                    source={AppImages.white_check}
-                  />
-                </TouchableOpacity>
+                  {isTermsAccepted && (
+                    <Image
+                      style={{
+                        width: 10,
+                        height: 10,
+                        resizeMode: 'contain',
+                      }}
+                      source={AppImages.white_check}
+                    />
+                  )}
+                </View>
                 <Text
                   style={{
                     fontSize: scaledFontWidth(11),
@@ -521,7 +499,7 @@ const SignupScreen = ({navigation}: Props) => {
                   <Text>{' and'}</Text>
                   <Text style={{color: colors.black}}>{' Privacy'}</Text>
                 </Text>
-              </View>
+              </TouchableOpacity>
 
               <AppButton
                 onPress={() => {
@@ -531,7 +509,7 @@ const SignupScreen = ({navigation}: Props) => {
                     Alert.alert('Please accept the terms and conditions');
                   }
                 }}
-                width={wp(90)}
+                width={wp(85)}
                 height={50}
                 label={'Continue'}
                 textColor={colors.black}
@@ -546,28 +524,24 @@ const SignupScreen = ({navigation}: Props) => {
 };
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: colors.white,
     flex: 1,
-    padding: 20,
+    backgroundColor: colors.white,
   },
   scrollContainer: {
     flexGrow: 1,
-    paddingBottom: 20, // Add some padding at the bottom
+    padding: 20,
   },
   imageContainer: {
     width: 100,
     height: 100,
-    justifyContent: 'center',
-    alignItems: 'center',
+    alignSelf: 'center',
+    marginBottom: 20,
+    borderRadius: 50,
+    overflow: 'hidden',
   },
   icon: {
-    borderRadius: 100,
-    flex: 1,
-    height: '100%',
-    overflow: 'hidden',
     width: '100%',
+    height: '100%',
     backgroundColor: 'rgba(151, 148, 148, 0.46)',
   },
   loader: {

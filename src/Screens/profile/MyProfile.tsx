@@ -77,7 +77,7 @@ const MyProfileScreen = ({ navigation }: Props) => {
                 <Image
                     style={styles.icon}
                     resizeMode="cover"
-                    source={{ uri: imageSource.uri }}
+                    source={imageSource}
                     onLoadStart={() => setImageLoading(true)}
                     onLoadEnd={() => setImageLoading(false)}
                     onError={(e) => {

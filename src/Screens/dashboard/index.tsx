@@ -10,6 +10,7 @@ import {scaledFontWidth} from '../../utils/AppUtils.js';
 import SearchHistoryScreen from './history';
 import {checkAndUpdateSubscription} from '../../utils/subscriotions.ts';
 import {useDispatch} from 'react-redux';
+import AppImageBackgroundContainer from '../../components/AppImageBackgroundContainer';
 
 const BottomTab = createBottomTabNavigator();
 
@@ -110,59 +111,65 @@ const Dashboard = () => {
   }
 
   return (
-    <BottomTab.Navigator
-      shifting={true}
-      backBehavior="none"
-      activeColor={colors.white}
-      inactiveColor={colors.black}
-      tabBarOptions={{
-        showLabel: false,
-        activeTintColor: colors.black,
-        tabBarStyle: {
-          backgroundColor: colors.accentColor,
-          fontFamily: AppFonts.general_regular,
-        },
-      }}
-      screenOptions={{
-        tabBarStyle: {
-          backgroundColor: colors.accentColor,
-          height: 70,
-          paddingTop: 20,
-          borderTopWidth: 0.5,
-          borderTopColor: 'rgba(60, 60, 67, 0.12)',
-        },
-        headerShown: false,
-        fontFamily: AppFonts.general_regular,
-      }}>
-      <BottomTab.Screen
-        name="Search"
-        component={SearchScreen}
-        options={{
-          tabBarIcon: ({focused, color}) => (
-            <TabIcon
-              color={color}
-              title="Search"
-              focused={focused}
-              icon={AppImages.nav_search}
-            />
-          ),
-        }}
-      />
-      <BottomTab.Screen
-        name="History"
-        component={SearchHistoryScreen}
-        options={{
-          tabBarIcon: ({focused, color}) => (
-            <TabIcon
-              color={color}
-              title="History"
-              focused={focused}
-              icon={AppImages.nav_search_history}
-            />
-          ),
-        }}
-      />
-    </BottomTab.Navigator>
+    <AppImageBackgroundContainer
+      backgroundImage={AppImages.lines_vector}
+      loading={false}
+      children={
+        <BottomTab.Navigator
+          shifting={true}
+          backBehavior="none"
+          activeColor={colors.white}
+          inactiveColor={colors.black}
+          tabBarOptions={{
+            showLabel: false,
+            activeTintColor: colors.black,
+            tabBarStyle: {
+              backgroundColor: colors.accentColor,
+              fontFamily: AppFonts.general_regular,
+            },
+          }}
+          screenOptions={{
+            tabBarStyle: {
+              backgroundColor: colors.accentColor,
+              height: 70,
+              paddingTop: 20,
+              borderTopWidth: 0.5,
+              borderTopColor: 'rgba(60, 60, 67, 0.12)',
+            },
+            headerShown: false,
+            fontFamily: AppFonts.general_regular,
+          }}>
+          <BottomTab.Screen
+            name="Search"
+            component={SearchScreen}
+            options={{
+              tabBarIcon: ({focused, color}) => (
+                <TabIcon
+                  color={color}
+                  title="Search"
+                  focused={focused}
+                  icon={AppImages.nav_search}
+                />
+              ),
+            }}
+          />
+          <BottomTab.Screen
+            name="History"
+            component={SearchHistoryScreen}
+            options={{
+              tabBarIcon: ({focused, color}) => (
+                <TabIcon
+                  color={color}
+                  title="History"
+                  focused={focused}
+                  icon={AppImages.nav_search_history}
+                />
+              ),
+            }}
+          />
+        </BottomTab.Navigator>
+      }
+    />
   );
 };
 

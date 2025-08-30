@@ -16,17 +16,6 @@ const PaymentCompletedScreen = ({navigation}: Props) => {
         <ImageBackground style={
             styles.container
         } source={AppImages.lines_vector} resizeMode={'cover'}>
-            <TouchableOpacity style={{
-                width: scaledFontWidth(24),
-                height: getScaledHeight(24),
-            }} onPress={() => {
-                navigation.goBack();
-            }}>
-                <Image source={AppImages.ic_cross} style={{
-                    width: scaledFontWidth(24),
-                    height: getScaledHeight(24),
-                }}/>
-            </TouchableOpacity>
             <View style={{justifyContent: 'center', flex: 1}}>
                 <ImageBackground style={styles.starIcon} resizeMode="cover" source={AppImages.star}>
                     <Image style={styles.checkIcon} resizeMode="cover" source={AppImages.black_check}/>

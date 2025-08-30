@@ -185,7 +185,7 @@ const SearchElectricProviders = ({navigation}) => {
             source={dummyLogo}
           />
           <View>
-            <Text style={styles.providerName}>{item.provider_name}</Text>
+            <Text style={styles.providerName}>{item.provider_name.replace(/-/g, ' ')}</Text>
             <Text style={styles.providerAbout}>{item.provider_type}</Text>
           </View>
         </View>

@@ -9,15 +9,15 @@
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* MeterMateTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* MeterMateTests.m */; };
 		0B64A505DF014413830D2248 /* Inter-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5FA78EC56C0A42FB9C789ACC /* Inter-SemiBold.ttf */; };
-		0C80B921A6F3F58F76C31292 /* libPods-MeterMate.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DCACB8F33CDC322A6C60F78 /* libPods-MeterMate.a */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		18065B812E36B74B00F34058 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18065B802E36B74B00F34058 /* StoreKit.framework */; };
 		18D6DC7779ED4EA2B3A9974F /* GeneralSans-VariableItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 21ED5C0264D1482EA3C260F1 /* GeneralSans-VariableItalic.ttf */; };
 		367E022D78FF4F4CB886FCD7 /* Inter-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = AAD9227EB18444589D068EB5 /* Inter-Italic.ttf */; };
-		7699B88040F8A987B510C191 /* libPods-MeterMate-MeterMateTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19F6CBCC0A4E27FBF8BF4A61 /* libPods-MeterMate-MeterMateTests.a */; };
+		57D35E34E4A1D0BA7E214E56 /* Pods_MeterMate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C8C7DDB055691D4DF6DE7CCC /* Pods_MeterMate.framework */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		A06F779CA8410755769DFDFF /* Pods_MeterMate_MeterMateTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0B58711FCB9BD9A8697DDB3F /* Pods_MeterMate_MeterMateTests.framework */; };
 		AFC1E447B44F4250856E759D /* Inter-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B2E104721DB5412F83EC455D /* Inter-Regular.ttf */; };
 		CB97B64D9AE74BF021686242 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 87DA734B57026491D56642B3 /* PrivacyInfo.xcprivacy */; };
 		D89560D3B5104CFB860B82D0 /* General Sans.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FF24E95B64CC47F19B001DC7 /* General Sans.ttf */; };
@@ -38,6 +38,7 @@
 		00E356EE1AD99517003FC87E /* MeterMateTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MeterMateTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* MeterMateTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MeterMateTests.m; sourceTree = "<group>"; };
+		0B58711FCB9BD9A8697DDB3F /* Pods_MeterMate_MeterMateTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MeterMate_MeterMateTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07F961A680F5B00A75B9A /* MeterMate.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MeterMate.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = MeterMate/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = MeterMate/AppDelegate.mm; sourceTree = "<group>"; };
@@ -46,18 +47,17 @@
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = MeterMate/main.m; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = MeterMate/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		18065B802E36B74B00F34058 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
-		19F6CBCC0A4E27FBF8BF4A61 /* libPods-MeterMate-MeterMateTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-MeterMate-MeterMateTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		21ED5C0264D1482EA3C260F1 /* GeneralSans-VariableItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "GeneralSans-VariableItalic.ttf"; path = "../assets/fonts/GeneralSans-VariableItalic.ttf"; sourceTree = "<group>"; };
 		3B4392A12AC88292D35C810B /* Pods-MeterMate.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MeterMate.debug.xcconfig"; path = "Target Support Files/Pods-MeterMate/Pods-MeterMate.debug.xcconfig"; sourceTree = "<group>"; };
 		5709B34CF0A7D63546082F79 /* Pods-MeterMate.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MeterMate.release.xcconfig"; path = "Target Support Files/Pods-MeterMate/Pods-MeterMate.release.xcconfig"; sourceTree = "<group>"; };
 		5B7EB9410499542E8C5724F5 /* Pods-MeterMate-MeterMateTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MeterMate-MeterMateTests.debug.xcconfig"; path = "Target Support Files/Pods-MeterMate-MeterMateTests/Pods-MeterMate-MeterMateTests.debug.xcconfig"; sourceTree = "<group>"; };
-		5DCACB8F33CDC322A6C60F78 /* libPods-MeterMate.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-MeterMate.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5FA78EC56C0A42FB9C789ACC /* Inter-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-SemiBold.ttf"; path = "../assets/fonts/Inter-SemiBold.ttf"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = MeterMate/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		87DA734B57026491D56642B3 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = MeterMate/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		89C6BE57DB24E9ADA2F236DE /* Pods-MeterMate-MeterMateTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MeterMate-MeterMateTests.release.xcconfig"; path = "Target Support Files/Pods-MeterMate-MeterMateTests/Pods-MeterMate-MeterMateTests.release.xcconfig"; sourceTree = "<group>"; };
 		AAD9227EB18444589D068EB5 /* Inter-Italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Italic.ttf"; path = "../assets/fonts/Inter-Italic.ttf"; sourceTree = "<group>"; };
 		B2E104721DB5412F83EC455D /* Inter-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Regular.ttf"; path = "../assets/fonts/Inter-Regular.ttf"; sourceTree = "<group>"; };
+		C8C7DDB055691D4DF6DE7CCC /* Pods_MeterMate.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MeterMate.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		FECDC34B3407466CB2766402 /* GeneralSans-Regular.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "GeneralSans-Regular.otf"; path = "../assets/fonts/GeneralSans-Regular.otf"; sourceTree = "<group>"; };
 		FF24E95B64CC47F19B001DC7 /* General Sans.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "General Sans.ttf"; path = "../assets/fonts/General Sans.ttf"; sourceTree = "<group>"; };
@@ -68,7 +68,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7699B88040F8A987B510C191 /* libPods-MeterMate-MeterMateTests.a in Frameworks */,
+				A06F779CA8410755769DFDFF /* Pods_MeterMate_MeterMateTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -76,8 +76,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0C80B921A6F3F58F76C31292 /* libPods-MeterMate.a in Frameworks */,
 				18065B812E36B74B00F34058 /* StoreKit.framework in Frameworks */,
+				57D35E34E4A1D0BA7E214E56 /* Pods_MeterMate.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -121,8 +121,8 @@
 			children = (
 				18065B802E36B74B00F34058 /* StoreKit.framework */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				5DCACB8F33CDC322A6C60F78 /* libPods-MeterMate.a */,
-				19F6CBCC0A4E27FBF8BF4A61 /* libPods-MeterMate-MeterMateTests.a */,
+				C8C7DDB055691D4DF6DE7CCC /* Pods_MeterMate.framework */,
+				0B58711FCB9BD9A8697DDB3F /* Pods_MeterMate_MeterMateTests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -517,7 +517,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -546,7 +546,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -610,6 +610,17 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon/ReactCommon.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon/ReactCommon.framework/Headers/react/nativemodule/core",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon-Samples/ReactCommon_Samples.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon-Samples/ReactCommon_Samples.framework/Headers/platform/ios",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-Fabric/React_Fabric.framework/Headers/react/renderer/components/view/platform/cxx",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-NativeModulesApple/React_NativeModulesApple.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-graphics/React_graphics.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-graphics/React_graphics.framework/Headers/react/renderer/graphics/platform/ios",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
 				LD = "";
 				LDPLUSPLUS = "";
@@ -684,6 +695,17 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon/ReactCommon.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon/ReactCommon.framework/Headers/react/nativemodule/core",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon-Samples/ReactCommon_Samples.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon-Samples/ReactCommon_Samples.framework/Headers/platform/ios",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-Fabric/React_Fabric.framework/Headers/react/renderer/components/view/platform/cxx",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-NativeModulesApple/React_NativeModulesApple.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-graphics/React_graphics.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-graphics/React_graphics.framework/Headers/react/renderer/graphics/platform/ios",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
 				LD = "";
 				LDPLUSPLUS = "";

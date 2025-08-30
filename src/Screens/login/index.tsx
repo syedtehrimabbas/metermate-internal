@@ -26,10 +26,10 @@ type Props = {
   navigation: any;
 };
 const LoginScreen = ({navigation}: Props) => {
-  // const [email, Email] = useState('');
-  // const [password, Password] = useState('');
-  const [email, Email] = useState('test@gmail.com');
-  const [password, Password] = useState('Hello786@');
+  const [email, Email] = useState('');
+  const [password, Password] = useState('');
+  // const [email, Email] = useState('test@gmail.com');
+  // const [password, Password] = useState('Hello786@');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{email?: string; password?: string}>({});
 
@@ -205,12 +205,12 @@ const LoginScreen = ({navigation}: Props) => {
 
               <View style={styles.rectangleView}>
                 <Text
-                  onPress={() => {
-                    navigation.navigate('SocialLogin');
-                  }}
                   style={styles.dontHaveAn}>
                   {'Dont have an account? '}{' '}
                   <Text
+                    onPress={() => {
+                      navigation.navigate('SocialLogin');
+                    }}
                     style={{
                       color: colors.black1,
                       textDecorationLine: 'underline',

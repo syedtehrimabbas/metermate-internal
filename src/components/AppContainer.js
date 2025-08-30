@@ -1,27 +1,40 @@
 import React from 'react';
-import {StatusBar, useColorScheme, View} from 'react-native';
+import {
+  Platform,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  useColorScheme,
+  View,
+} from 'react-native';
 import Loader from './Loader';
 import colors from '../theme/colors';
 
 const AppContainer = ({children, loading, backgroundColor = colors.white}) => {
   const isDarkMode = useColorScheme() === 'dark';
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? colors.primaryDarkColor : colors.primaryColor,
-  };
   return (
-    <View
-      style={{
-        backgroundColor: backgroundColor ? backgroundColor : colors.white,
-        flex: 1,
-        flexDirection: 'column',
-      }}>
+    <View style={[styles.container, {backgroundColor}]}>
       <StatusBar
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
+        backgroundColor="transparent"
+        translucent
       />
-      <Loader loading={loading} />
-      {children}
+      <SafeAreaView style={styles.safeArea}>
+        <Loader loading={loading} />
+        {children}
+      </SafeAreaView>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  safeArea: {
+    flex: 1,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+  },
+});
+
 export default AppContainer;
