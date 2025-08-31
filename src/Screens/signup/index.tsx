@@ -16,7 +16,7 @@ import colors from '../../theme/colors';
 import {AppFonts} from '../../fonts';
 import {AppImages} from '../../images';
 import {AppInput} from '../../components/AppInput.js';
-import {scaledFontWidth} from '../../utils/AppUtils.js';
+import {getScaledHeight, scaledFontWidth} from '../../utils/AppUtils.js';
 import {AppButton} from '../../components/AppButton.js';
 import {wp} from '../../utils/Dimension.js';
 import {supabase} from '../../utils/supabase.ts';
@@ -43,8 +43,6 @@ const SignupScreen = ({navigation}: Props) => {
   const [isTermsAccepted, acceptTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pickedImage, setPickedImage] = useState<Asset | null>(null);
-  // const [profileImage, setProfileImage] = useState<string | undefined>();
-
   const [imageError, setImageError] = useState(false);
   const [imageSource, setImageSource] = useState(
     !imageError && '' ? {uri: ''} : AppImages.signup_image_ph,
@@ -140,7 +138,6 @@ const SignupScreen = ({navigation}: Props) => {
     const imageAsset = response.assets[0];
 
     setPickedImage(imageAsset);
-    // setProfileImage(imageAsset.uri);
     setImageSource({uri: imageAsset.uri});
   };
 
@@ -333,18 +330,40 @@ const SignupScreen = ({navigation}: Props) => {
             <ScrollView
               contentContainerStyle={styles.scrollContainer}
               keyboardShouldPersistTaps="handled">
-              <Text
+              <View
                 style={{
-                  fontSize: scaledFontWidth(26),
-                  letterSpacing: -0.6,
-                  lineHeight: 34,
-                  marginTop: 20,
-                  fontWeight: '500',
-                  fontFamily: AppFonts.general_regular,
-                  color: colors.textColor,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
                 }}>
-                {'Sign up'}
-              </Text>
+                <Text
+                  style={{
+                    fontSize: scaledFontWidth(26),
+                    letterSpacing: -0.6,
+                    lineHeight: 34,
+                    fontWeight: '500',
+                    marginTop: 20,
+                    fontFamily: AppFonts.general_regular,
+                    color: colors.textColor,
+                  }}>
+                  {'Sign up'}
+                </Text>
+                <TouchableOpacity
+                  style={{
+                    width: scaledFontWidth(24),
+                    height: getScaledHeight(24),
+                  }}
+                  onPress={() => {
+                    navigation.goBack();
+                  }}>
+                  <Image
+                    source={AppImages.ic_cross}
+                    style={{
+                      width: scaledFontWidth(24),
+                      height: getScaledHeight(24),
+                    }}
+                  />
+                </TouchableOpacity>
+              </View>
 
               <Text
                 style={{
@@ -372,14 +391,14 @@ const SignupScreen = ({navigation}: Props) => {
                   </View>
                   <Image
                     style={{
-                      width: 28,
-                      height: 28,
+                      width: 30,
+                      height: 30,
                       resizeMode: 'contain',
                       position: 'absolute',
-                      bottom: 0,
+                      bottom: 10,
                       right: 5,
                     }}
-                    source={AppImages.ic_camera}
+                    source={AppImages.plus_icon}
                   />
                 </View>
               </TouchableWithoutFeedback>

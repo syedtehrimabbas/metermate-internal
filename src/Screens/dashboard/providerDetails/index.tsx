@@ -8,15 +8,17 @@ import {
   View,
 } from 'react-native';
 import {getScaledHeight, scaledFontWidth} from '../../../utils/AppUtils';
-import {hp} from '../../../utils/Dimension';
 import {AppImages} from '../../../images';
 import colors from '../../../theme/colors';
+import {AppFonts} from '../../../fonts';
 
 const ProviderDetailsScreen = ({route, navigation}) => {
   const [provider_name, set_provider_name] = useState('');
   const [provider_type, set_provider_type] = useState('');
   const [avg_electric_rate, set_avg_electric_rate] = useState(0);
   const [offers_net_metering, set_offers_net_metering] = useState('');
+  const [phone, setPhone] = useState('N/A');
+  const [website, setWebsite] = useState('N/A');
   const [provider, set_provider] = useState();
   useEffect(() => {
     const provider = route.params?.provider;
@@ -25,6 +27,8 @@ const ProviderDetailsScreen = ({route, navigation}) => {
     set_provider_type(provider.provider_type);
     set_avg_electric_rate(provider.avg_electric_rate);
     set_offers_net_metering(provider.offers_net_metering);
+    setPhone(provider.phone);
+    setWebsite(provider.website);
   }, [route.params]);
   const renderProvider = () => (
     <View style={styles.providerCard}>
@@ -35,11 +39,13 @@ const ProviderDetailsScreen = ({route, navigation}) => {
           marginBottom: 8,
         }}>
         <Image
-          style={{width: 50, height: 50, marginEnd: 15}}
+          style={{width: 48, height: 48, marginEnd: 15}}
           source={AppImages.dummy_company_logo_one}
         />
         <View>
-          <Text style={styles.providerName}>{provider_name}</Text>
+          <Text style={styles.providerName}>
+            {provider_name.replace(/-/g, ' ')}
+          </Text>
           <Text style={styles.providerAbout}>{provider_type}</Text>
         </View>
       </View>
@@ -47,32 +53,52 @@ const ProviderDetailsScreen = ({route, navigation}) => {
       <View style={{flexDirection: 'row', flex: 2, marginTop: 10}}>
         <View style={{flex: 1}}>
           <Text style={styles.providerAbout}>{'Average Electric Rate:'}</Text>
-          <Text style={[styles.providerName, {marginTop: 10}]}>
+          <Text
+            style={[
+              styles.providerName,
+              {marginTop: 10, fontSize: scaledFontWidth(12)},
+            ]}>
             {avg_electric_rate}
           </Text>
         </View>
 
         <View style={{flex: 1}}>
           <Text style={styles.providerAbout}>{'Offers Net Metering:'}</Text>
-          <Text style={[styles.providerName, {marginTop: 10}]}>
+          <Text
+            style={[
+              styles.providerName,
+              {marginTop: 10, fontSize: scaledFontWidth(12)},
+            ]}>
             {offers_net_metering}
           </Text>
         </View>
       </View>
 
       {/* Row Two */}
-      {/*
-                <View style={{ flexDirection: 'row', flex: 2, marginTop: 10 }}>
-                    <View style={{ flex: 1 }}>
-                        <Text style={styles.providerAbout}>{'Program Availability:'}</Text>
-                        <Text style={[styles.providerName, { marginTop: 10 }]}>{item.programAvailability}</Text>
-                    </View>
 
-                    <View style={{ flex: 1 }}>
-                        <Text style={styles.providerAbout}>{'Impact on Energy Bills:'}</Text>
-                        <Text style={[styles.providerName, { marginTop: 10 }]}>{item.impact}</Text>
-                    </View>
-                </View> */}
+      <View style={{flexDirection: 'row', flex: 2, marginTop: 10}}>
+        <View style={{flex: 1}}>
+          <Text style={styles.providerAbout}>{'Phone:'}</Text>
+          <Text
+            style={[
+              styles.providerName,
+              {marginTop: 10, fontSize: scaledFontWidth(12)},
+            ]}>
+            {phone ? phone : 'N/A'}
+          </Text>
+        </View>
+
+        <View style={{flex: 1}}>
+          <Text style={styles.providerAbout}>{'Website:'}</Text>
+          <Text
+            style={[
+              styles.providerName,
+              {marginTop: 10, fontSize: scaledFontWidth(12)},
+            ]}>
+            {website ? website : 'N/A'}
+          </Text>
+        </View>
+      </View>
     </View>
   );
 
@@ -109,14 +135,13 @@ const ProviderDetailsScreen = ({route, navigation}) => {
       <View style={styles.section}>
         <View style={styles.headerRow}>
           <Text style={styles.sectionTitle}>Energy Rate Details</Text>
-          <TouchableOpacity
-            onPress={() => setExpanded(prev => !prev)}>
+          <TouchableOpacity onPress={() => setExpanded(prev => !prev)}>
             {
               <Image
                 source={
                   expanded ? AppImages.faChevronUp : AppImages.faChevronDown
                 }
-                style={{height: 20, width: 20, resizeMode: 'contain'}}
+                style={{height: 16, width: 16, resizeMode: 'contain'}}
               />
             }
           </TouchableOpacity>
@@ -181,14 +206,13 @@ const ProviderDetailsScreen = ({route, navigation}) => {
       <View style={styles.section}>
         <View style={styles.headerRow}>
           <Text style={styles.sectionTitle}>Net Metering Program Details</Text>
-          <TouchableOpacity
-            onPress={() => setExpanded(prev => !prev)}>
-              <Image
-                  source={
-                      expanded ? AppImages.faChevronUp : AppImages.faChevronDown
-                  }
-                  style={{height:20,width:20,resizeMode:'contain'}}
-              />
+          <TouchableOpacity onPress={() => setExpanded(prev => !prev)}>
+            <Image
+              source={
+                expanded ? AppImages.faChevronUp : AppImages.faChevronDown
+              }
+              style={{height: 16, width: 16, resizeMode: 'contain'}}
+            />
           </TouchableOpacity>
         </View>
 
@@ -222,15 +246,18 @@ const ProviderDetailsScreen = ({route, navigation}) => {
     <ScrollView style={styles.container}>
       <TouchableOpacity
         style={{
-          width: scaledFontWidth(24),
-          height: getScaledHeight(24),
-          marginBottom: hp(2),
+          flex: 1,
+          marginTop: 10,
+          marginRight: 10,
+          alignSelf: 'flex-end',
+          width: scaledFontWidth(30),
+          height: getScaledHeight(30),
         }}
         onPress={() => {
           navigation.goBack();
         }}>
         <Image
-          source={AppImages.back_arrow}
+          source={AppImages.ic_cross}
           style={{
             width: scaledFontWidth(24),
             height: getScaledHeight(24),
@@ -246,7 +273,7 @@ const ProviderDetailsScreen = ({route, navigation}) => {
       {NetMeteringDetails()}
 
       {/* Benefits Section */}
-      <View style={styles.section}>
+      {/*<View style={styles.section}>
         <Text style={styles.sectionTitle}>Benefits of the Program</Text>
         <View style={styles.benefitsList}>
           <Text style={styles.benefitItem}>
@@ -266,7 +293,7 @@ const ProviderDetailsScreen = ({route, navigation}) => {
             dedicated energy advisors.
           </Text>
         </View>
-      </View>
+      </View>*/}
     </ScrollView>
   );
 };
@@ -280,6 +307,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: 16,
     margin: 16,
+    marginTop: 0,
     borderRadius: 12,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
@@ -298,13 +326,14 @@ const styles = StyleSheet.create({
     marginEnd: 15,
   },
   providerName: {
-    fontSize: 18,
+    fontSize: scaledFontWidth(14),
     fontWeight: '600',
-    color: '#333',
+    color: '#100607',
   },
   providerAbout: {
-    fontSize: 14,
-    color: '#666',
+    fontFamily: AppFonts.inter_regular,
+    fontSize: scaledFontWidth(12),
+    color: 'rgba(0, 0, 0, 0.5)',
     marginTop: 4,
   },
   row: {
@@ -342,13 +371,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: scaledFontWidth(16),
+    fontWeight: '500',
+    color: '#100607',
   },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: '#F5F5F5',
     borderRadius: 25,
     padding: 4,
     marginBottom: 16,
@@ -357,6 +385,8 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 8,
     alignItems: 'center',
+    justifyContent: 'center',
+    height: 40,
   },
   activeTab: {
     // backgroundColor: '#4CAF50',
@@ -364,13 +394,14 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   tabText: {
-    fontSize: 12,
-    color: '#333',
-    fontWeight: '600',
+    fontSize: scaledFontWidth(12),
+    fontFamily: AppFonts.inter_regular,
+    color: 'rgba(0, 0, 0, 1)',
+    fontWeight: '500',
   },
   description: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: scaledFontWidth(13),
+    color: 'rgba(0, 0, 0, 0.5)',
     lineHeight: 20,
   },
   toggleText: {

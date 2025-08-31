@@ -144,6 +144,7 @@ const LoginScreen = ({navigation}: Props) => {
                 <AppInput
                   ref={emailInputRef}
                   placeholder={'Email'}
+                  isError={errors.email}
                   onChangeText={text => {
                     Email(text);
                     if (errors.email) {
@@ -162,6 +163,7 @@ const LoginScreen = ({navigation}: Props) => {
               <View style={{width: '100%'}}>
                 <AppInput
                   ref={passwordIRef}
+                  isError={errors.password}
                   placeholder={'Password'}
                   onChangeText={text => {
                     Password(text);
@@ -205,12 +207,12 @@ const LoginScreen = ({navigation}: Props) => {
 
               <View style={styles.rectangleView}>
                 <Text
+                  onPress={() => {
+                    navigation.navigate('SocialLogin');
+                  }}
                   style={styles.dontHaveAn}>
                   {'Dont have an account? '}{' '}
                   <Text
-                    onPress={() => {
-                      navigation.navigate('SocialLogin');
-                    }}
                     style={{
                       color: colors.black1,
                       textDecorationLine: 'underline',
@@ -288,7 +290,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
     alignSelf: 'flex-start',
-    marginLeft: '5%',
   },
   dontHaveAn: {
     fontSize: scaledFontWidth(11),

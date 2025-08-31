@@ -14,11 +14,12 @@ import {hp} from '../../utils/Dimension';
 import colors from '../../theme/colors';
 import {AppFonts} from '../../fonts';
 import {checkAndUpdateSubscription} from '../../utils/subscriotions.ts';
+import SearchElectricProviders from '../dashboard/searchproviders';
 
 export const SubscriptionScreen = ({navigation}) => {
   const {subscription} = useSelector((state: any) => state.userInfo);
-    const dispatch = useDispatch(); // Access dispatch
-    const {
+  const dispatch = useDispatch(); // Access dispatch
+  const {
     activeSubscription = null,
     subscriptionHistory = [],
     isLoading = false, // Default to loading
@@ -121,11 +122,19 @@ export const SubscriptionScreen = ({navigation}) => {
           <Image
             style={styles.backIcon}
             resizeMode="contain"
-            source={AppImages.ic_cross}
+            source={AppImages.back_arrow}
           />
         </Pressable>
         <Text style={styles.headerTitle}>Your Subscription</Text>
-        <View style={{width: 30}} />
+        <Pressable
+          style={styles.backButton}
+          onPress={() => navigation.navigate(SearchElectricProviders)}>
+          <Image
+            style={styles.backIcon}
+            resizeMode="contain"
+            source={AppImages.ic_cross}
+          />
+        </Pressable>
       </View>
 
       {/* Subscription Card */}
@@ -188,7 +197,7 @@ export const SubscriptionScreen = ({navigation}) => {
               returnToDashboard: true,
             })
           }>
-            <Text style={[styles.buttonText, {color: colors.black}]}>
+          <Text style={[styles.buttonText, {color: colors.black}]}>
             {subscriptionData.type ? 'Change Plan' : 'Subscribe Now'}
           </Text>
         </Pressable>
@@ -223,7 +232,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: hp(5),
     marginBottom: hp(3),
   },
   backButton: {

@@ -23,10 +23,10 @@ export const checkUserSubscription = async () => {
                     productId = androidData?.productId || purchase.productId;
 
                     isActive =
-                        purchase.purchaseStateAndroid === 1 || // Purchased
+                        purchase.purchaseStateAndroid === 1 ||
                         purchase.purchaseState === 'Purchased' ||
                         purchase.purchaseState === 'Restored' ||
-                        (androidData && Date.now() < androidData.purchaseTime + 30 * 24 * 60 * 60 * 1000); // Within 30 days
+                        (androidData && Date.now() < androidData.purchaseTime + 30 * 24 * 60 * 60 * 1000);
                 }
 
                 // iOS-specific

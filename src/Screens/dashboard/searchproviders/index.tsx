@@ -1,13 +1,14 @@
 import React, {useEffect, useState} from 'react';
 import {
-    FlatList,
-    Image,
-    Pressable, ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  FlatList,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import {AppImages} from '../../../images';
 import colors from '../../../theme/colors.js';
@@ -17,7 +18,7 @@ import {hp} from '../../../utils/Dimension.js';
 import {AppFonts} from '../../../fonts';
 import {supabase} from '../../../utils/supabase.ts';
 import AppContainer from '../../../components/AppContainer';
-import { useSelector } from 'react-redux';
+import {useSelector} from 'react-redux';
 
 function ProvidersSection({filteredProviders, renderProvider}) {
   return (
@@ -185,7 +186,9 @@ const SearchElectricProviders = ({navigation}) => {
             source={dummyLogo}
           />
           <View>
-            <Text style={styles.providerName}>{item.provider_name.replace(/-/g, ' ')}</Text>
+            <Text style={styles.providerName}>
+              {item.provider_name.replace(/-/g, ' ')}
+            </Text>
             <Text style={styles.providerAbout}>{item.provider_type}</Text>
           </View>
         </View>
@@ -254,10 +257,9 @@ const SearchElectricProviders = ({navigation}) => {
               value={search}
               onChangeText={handleSearch}
               onFocus={() => setDropdownVisible(true)}
-              // onBlur={() => setDropdownVisible(false)} // Hide dropdown when input loses focus
+              onBlur={() => setDropdownVisible(false)} // TODO("Hide dropdown when input loses focus")
             />
-
-            <View style={[styles.searchBarChild, styles.searchPosition]}>
+            <View style={[styles.searchBarChild]}>
               {search ? (
                 <Pressable onPress={clearSearch} style={styles.iconContainer}>
                   <Image source={AppImages.ic_cross} style={styles.icon} />
@@ -272,14 +274,14 @@ const SearchElectricProviders = ({navigation}) => {
             {/* Dropdown for Zipcodes */}
             {isDropdownVisible && filteredZipcodes.length > 0 && (
               <ScrollView style={styles.dropdown}>
-                  {filteredZipcodes.map(item => (
-                      <TouchableOpacity
-                          key={item.zipcode}
-                          onPress={() => handleZipcodeSelect(item)}
-                          style={styles.dropdownItem}>
-                          <Text style={styles.dropdownText}>{item.zipcode}</Text>
-                      </TouchableOpacity>
-                  ))}
+                {filteredZipcodes.map(item => (
+                  <TouchableOpacity
+                    key={item.zipcode}
+                    onPress={() => handleZipcodeSelect(item)}
+                    style={styles.dropdownItem}>
+                    <Text style={styles.dropdownText}>{item.zipcode}</Text>
+                  </TouchableOpacity>
+                ))}
               </ScrollView>
             )}
           </View>
@@ -333,6 +335,8 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingHorizontal: 12,
     height: 50,
+    flexDirection: 'row',
+    justifyContent: 'space-between'
   },
   searchInput: {
     flex: 1,
@@ -394,15 +398,10 @@ const styles = StyleSheet.create({
     color: colors.textColorGrey,
     fontWeight: '600',
   },
-  searchPosition: {
-    top: '50%',
-    position: 'absolute',
-  },
   searchBarChild: {
-    marginTop: -26,
-    right: 4,
-    width: 52,
-    height: 52,
+    width: scaledFontWidth(40),
+    height: getScaledHeight(40),
+    alignSelf: 'center',
     borderRadius: 14,
     backgroundColor: colors.accentColor,
     justifyContent: 'center',

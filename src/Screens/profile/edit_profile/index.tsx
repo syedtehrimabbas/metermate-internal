@@ -31,6 +31,7 @@ import {supabase} from '../../../utils/supabase.ts';
 import {launchImageLibrary} from 'react-native-image-picker';
 import AppContainer from '../../../components/AppContainer';
 import {updateUser} from '../../../redux';
+import SearchElectricProviders from '../../dashboard/searchproviders';
 
 type Props = {
   navigation: any;
@@ -273,12 +274,24 @@ const EditProfileScreen = ({navigation}: Props) => {
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
-                justifyContent: 'center',
+                justifyContent: 'space-between',
               }}>
               <Pressable
-                style={[styles.parent, {position: 'absolute', start: 0}]}
+                style={[styles.parent]}
                 onPress={() => {
                   navigation.goBack();
+                }}>
+                <Image
+                  style={styles.icon}
+                  resizeMode="cover"
+                  source={AppImages.back_arrow}
+                />
+              </Pressable>
+              <Text style={styles.editAccount}>{'Edit Account'}</Text>
+              <Pressable
+                style={[styles.parent]}
+                onPress={() => {
+                  navigation.navigate(SearchElectricProviders);
                 }}>
                 <Image
                   style={styles.icon}
@@ -286,7 +299,6 @@ const EditProfileScreen = ({navigation}: Props) => {
                   source={AppImages.ic_cross}
                 />
               </Pressable>
-              <Text style={styles.editAccount}>{'Edit Account'}</Text>
             </View>
 
             <View style={{alignSelf: 'center', marginTop: hp(10)}}>
@@ -343,7 +355,10 @@ const EditProfileScreen = ({navigation}: Props) => {
                 resizeMode="cover"
                 source={AppImages.ic_gift}
               />
-              <Text style={styles.freeTrial}>{`${activeSubscription} Subscription`}</Text>
+              <Text
+                style={
+                  styles.freeTrial
+                }>{`${activeSubscription} Subscription`}</Text>
             </View>
             <AppInput
               placeholder={'Full Name'}

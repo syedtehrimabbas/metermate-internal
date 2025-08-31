@@ -398,6 +398,7 @@ const ChooseSubscriptionScreen = ({
     <View style={styles.container}>
       <TouchableOpacity
         style={{
+          alignSelf: 'flex-end',
           width: scaledFontWidth(24),
           height: getScaledHeight(24),
         }}
@@ -560,15 +561,15 @@ const ChooseSubscriptionScreen = ({
         </View>
       ) : error ? (
         <View style={{alignItems: 'center', padding: 20}}>
-          <Text style={{color: 'red', marginBottom: 10}}>{error}</Text>
-          <AppButton
-            onPress={handleGetProducts}
-            width={wp(90)}
-            height={50}
-            label={'Retry Loading Subscriptions'}
-            textColor={colors.black}
-            backgroundColor={colors.accentColor}
-          />
+          {/*<Text style={{color: 'red', marginBottom: 10}}>{error}</Text>*/}
+          {/*<AppButton*/}
+          {/*  onPress={handleGetProducts}*/}
+          {/*  width={wp(90)}*/}
+          {/*  height={50}*/}
+          {/*  label={'Retry Loading Subscriptions'}*/}
+          {/*  textColor={colors.black}*/}
+          {/*  backgroundColor={colors.accentColor}*/}
+          {/*/>*/}
         </View>
       ) : (
         <AppButton
