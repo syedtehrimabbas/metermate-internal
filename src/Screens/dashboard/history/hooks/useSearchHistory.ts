@@ -11,7 +11,10 @@ export const useSearchHistory = (userId: string) => {
   const [selectedFilter, setSelectedFilter] = useState<FilterType>('date');
 
   const formatZipcodeHistory = useCallback((data: any[]): HistoryItem[] => {
-    const grouped: Record<string, Array<{zipcode: string; resultCount: number}>> = {};
+    const grouped: Record<
+      string,
+      Array<{zipcode: string; provider_uuid: string; resultCount: number}>
+    > = {};
 
     data.forEach(item => {
       const dateKey = format(new Date(item.created_at), 'MMMM dd, yyyy');
@@ -22,6 +25,7 @@ export const useSearchHistory = (userId: string) => {
 
       grouped[dateKey].push({
         zipcode: item.zipcode,
+        provider_uuid: item.provider_uuid,
         resultCount: item.results,
       });
     });
@@ -34,13 +38,14 @@ export const useSearchHistory = (userId: string) => {
 
   const fetchSearchHistory = useCallback(async () => {
     if (!userId) return;
-    
+
     setLoading(true);
     try {
       const {data, error} = await supabase
         .from('zipcodes_history')
         .select('*')
-        .eq('user_id', userId);
+        .eq('user_id', userId)
+        .not('provider_uuid', 'is', null);
 
       if (error) throw error;
 

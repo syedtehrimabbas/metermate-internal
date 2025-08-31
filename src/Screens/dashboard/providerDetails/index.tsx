@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {
   Image,
+  Linking,
   ScrollView,
   StyleSheet,
   Text,
@@ -27,7 +28,7 @@ const ProviderDetailsScreen = ({route, navigation}) => {
     set_provider_type(provider.provider_type);
     set_avg_electric_rate(provider.avg_electric_rate);
     set_offers_net_metering(provider.offers_net_metering);
-    setPhone(provider.phone);
+    setPhone(provider.phone_number);
     setWebsite(provider.website);
   }, [route.params]);
   const renderProvider = () => (
@@ -80,6 +81,11 @@ const ProviderDetailsScreen = ({route, navigation}) => {
         <View style={{flex: 1}}>
           <Text style={styles.providerAbout}>{'Phone:'}</Text>
           <Text
+            onPress={() => {
+              if (phone && phone !== 'N/A') {
+                Linking.openURL(`tel:${phone}`);
+              }
+            }}
             style={[
               styles.providerName,
               {marginTop: 10, fontSize: scaledFontWidth(12)},
@@ -91,6 +97,11 @@ const ProviderDetailsScreen = ({route, navigation}) => {
         <View style={{flex: 1}}>
           <Text style={styles.providerAbout}>{'Website:'}</Text>
           <Text
+            onPress={() => {
+              if (website && website !== 'N/A') {
+                Linking.openURL(website);
+              }
+            }}
             style={[
               styles.providerName,
               {marginTop: 10, fontSize: scaledFontWidth(12)},

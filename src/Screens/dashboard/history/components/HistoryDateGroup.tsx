@@ -6,16 +6,20 @@ import SearchResultItem from './SearchResultItem';
 
 interface HistoryDateGroupProps {
   historyItem: HistoryItem;
-  onResultPress: (zipcode: string) => void;
+  onResultPress: (zipcode: any) => void;
 }
 
-const HistoryDateGroup: React.FC<HistoryDateGroupProps> = ({historyItem,onResultPress}) => (
-  <View>
-    <Text style={styles.dateText}>{historyItem.date}</Text>
-    {historyItem.results.map((result, idx) => (
-      <SearchResultItem key={`${historyItem.date}-${idx}`} result={result} onPress={() => onResultPress(result.zipcode)} />
-    ))}
-  </View>
+const HistoryDateGroup: React.FC<HistoryDateGroupProps> = ({ historyItem, onResultPress }) => (
+    <View>
+        <Text style={styles.dateText}>{historyItem.date}</Text>
+        {[...historyItem.results].reverse().map((result, idx) => (
+            <SearchResultItem
+                key={`${historyItem.date}-${idx}`}
+                result={result}
+                onPress={() => onResultPress(result)}
+            />
+        ))}
+    </View>
 );
 
 export default HistoryDateGroup;

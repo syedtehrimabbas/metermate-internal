@@ -144,6 +144,7 @@ const SearchElectricProviders = ({navigation}) => {
         .from('zipcodes_history')
         .insert([
           {
+            provider_uuid: zipcode.provider_uuid,
             zipcode: zipcode.zipcode,
             results: filtered.length,
             user_id: userID,
@@ -335,7 +336,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     height: 50,
     flexDirection: 'row',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
   },
   searchInput: {
     flex: 1,

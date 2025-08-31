@@ -8,8 +8,9 @@ import {styles} from './styles';
 import {useSearchHistory} from './hooks/useSearchHistory';
 import FilterBar from './components/FilterBar';
 import HistoryDateGroup from './components/HistoryDateGroup';
+import {supabase} from '../../../utils/supabase.ts';
 
-const SearchHistoryScreen = () => {
+const SearchHistoryScreen = ({navigation}) => {
   const {user} = useSelector((state: any) => state.userInfo.userObject);
 
   const {
@@ -34,8 +35,22 @@ const SearchHistoryScreen = () => {
       setFilterText('');
     }
   };
-  const handleResultPress = useCallback((zipcode: string) => {
+  const handleResultPress = useCallback(async (zipcode: any) => {
     console.log('Clicked zipcode:', zipcode);
+    if (zipcode.provider_uuid == null) {
+      console.error('Provider uuid is null');
+    } else {
+      const {data, error} = await supabase
+        .from('energy_providers')
+        .select('*')
+        .eq('uuid', zipcode.provider_uuid)
+        .single();
+      if (error) {
+        console.error('Error fetching provider:', error);
+      } else {
+        navigation.navigate('ProviderDetailsScreen', {provider: data});
+      }
+    }
     // We'll add navigation here in the next step
   }, []);
   return (
@@ -52,7 +67,7 @@ const SearchHistoryScreen = () => {
         {filteredData.length === 0 ? (
           <Text style={styles.emptyStateText}>No records found</Text>
         ) : (
-          filteredData.map((historyItem, index) => (
+            [...filteredData].reverse().map((historyItem, index) => (
             <HistoryDateGroup
               key={`${historyItem.date}-${index}`}
               historyItem={historyItem}
