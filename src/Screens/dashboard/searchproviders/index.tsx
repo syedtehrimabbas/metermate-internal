@@ -257,7 +257,6 @@ const SearchElectricProviders = ({navigation}) => {
               value={search}
               onChangeText={handleSearch}
               onFocus={() => setDropdownVisible(true)}
-              onBlur={() => setDropdownVisible(false)} // TODO("Hide dropdown when input loses focus")
             />
             <View style={[styles.searchBarChild]}>
               {search ? (
