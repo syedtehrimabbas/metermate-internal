@@ -19,6 +19,7 @@ import EditProfileScreen from './edit_profile';
 import {clearUser} from '../../redux';
 import {useFocusEffect} from '@react-navigation/native';
 import AppImageBackgroundContainer from '../../components/AppImageBackgroundContainer';
+import Colors from '../../theme/colors';
 
 type Props = {
   navigation: any;
@@ -63,6 +64,7 @@ const MyProfileScreen = ({navigation}: Props) => {
   return (
     <AppImageBackgroundContainer
       backgroundImage={AppImages.lines_vector}
+      backgroundColor={Colors.accentColor}
       loading={false}
       children={
         <View style={styles.container}>
@@ -164,14 +166,15 @@ const MyProfileScreen = ({navigation}: Props) => {
             isDisable={false}
           />
         </View>
-      }></AppImageBackgroundContainer>
+      }
+    />
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    height: '60%',
+    height: '100%',
     flex: 1,
     overflow: 'hidden',
     padding: 20,

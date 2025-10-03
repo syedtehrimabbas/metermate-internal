@@ -15,6 +15,8 @@ import colors from '../../theme/colors';
 import {AppFonts} from '../../fonts';
 import {checkAndUpdateSubscription} from '../../utils/subscriotions.ts';
 import SearchElectricProviders from '../dashboard/searchproviders';
+import AppImageBackgroundContainer from '../../components/AppImageBackgroundContainer';
+import Dashboard from "../dashboard";
 
 export const SubscriptionScreen = ({navigation}) => {
   const {subscription} = useSelector((state: any) => state.userInfo);
@@ -93,116 +95,118 @@ export const SubscriptionScreen = ({navigation}) => {
 
   if (error) {
     return (
-      <ImageBackground
-        style={styles.container}
-        source={AppImages.lines_vector}
-        resizeMode={'cover'}>
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Failed to load subscription data</Text>
-          <Pressable
-            style={styles.retryButton}
-            onPress={() => dispatch(checkAndUpdateSubscription())}>
-            <Text style={styles.retryButtonText}>Retry</Text>
-          </Pressable>
-        </View>
-      </ImageBackground>
+      <AppImageBackgroundContainer
+        backgroundImage={AppImages.lines_vector}
+        loading={false}
+        children={
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>
+              Failed to load subscription data
+            </Text>
+            <Pressable
+              style={styles.retryButton}
+              onPress={() => checkAndUpdateSubscription(dispatch)}>
+              <Text style={styles.retryButtonText}>Retry</Text>
+            </Pressable>
+          </View>
+        }></AppImageBackgroundContainer>
     );
   }
 
   return (
-    <ImageBackground
-      style={styles.container}
-      source={AppImages.lines_vector}
-      resizeMode={'cover'}>
-      {/* Header with back button */}
-      <View style={styles.header}>
-        <Pressable
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}>
-          <Image
-            style={styles.backIcon}
-            resizeMode="contain"
-            source={AppImages.back_arrow}
-          />
-        </Pressable>
-        <Text style={styles.headerTitle}>Your Subscription</Text>
-        <Pressable
-          style={styles.backButton}
-          onPress={() => navigation.navigate(SearchElectricProviders)}>
-          <Image
-            style={styles.backIcon}
-            resizeMode="contain"
-            source={AppImages.ic_cross}
-          />
-        </Pressable>
-      </View>
-
-      {/* Subscription Card */}
-      <View style={styles.subscriptionCard}>
-        <View style={styles.cardHeader}>
-          <Text style={styles.planName}>
-            {subscriptionData.type === 'yearly'
-              ? 'Yearly Plan'
-              : subscriptionData.type === 'monthly'
-              ? 'Monthly Plan'
-              : 'No Active Subscription'}
-          </Text>
-          {subscriptionData.type && (
-            <>
-              <Text style={styles.planPrice}>{subscriptionData.price}</Text>
-              <Text style={styles.renewalText}>
-                {subscriptionData.nextRenewal === 'N/A'
-                  ? 'No active subscription'
-                  : `Renews on ${subscriptionData.nextRenewal}`}
-              </Text>
-            </>
-          )}
-        </View>
-
-        <View style={styles.divider} />
-
-        <View style={styles.benefitsContainer}>
-          <Text style={styles.benefitsTitle}>
-            {subscriptionData.type ? 'Plan Benefits:' : 'Basic Features:'}
-          </Text>
-          {subscriptionData.benefits.map((benefit, index) => (
-            <View key={index} style={styles.benefitItem}>
+    <AppImageBackgroundContainer
+      backgroundImage={AppImages.lines_vector}
+      loading={false}
+      children={
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <Pressable
+              style={styles.backButton}
+              onPress={() => navigation.goBack()}>
               <Image
-                source={AppImages.check_circle}
-                style={styles.benefitIcon}
+                style={styles.backIcon}
+                resizeMode="contain"
+                source={AppImages.back_arrow}
               />
-              <Text style={styles.benefitText}>{benefit}</Text>
-            </View>
-          ))}
-          {subscriptionData.type === 'yearly' && (
-            <View style={styles.benefitItem}>
+            </Pressable>
+            <Text style={styles.headerTitle}>Your Subscription</Text>
+            <Pressable
+              style={styles.backButton}
+              onPress={() => navigation.navigate(Dashboard)}>
               <Image
-                source={AppImages.check_circle}
-                style={styles.benefitIcon}
+                style={styles.backIcon}
+                resizeMode="contain"
+                source={AppImages.ic_cross}
               />
-              <Text style={styles.benefitText}>
-                20% discount compared to monthly
+            </Pressable>
+          </View>
+
+          {/* Subscription Card */}
+          <View style={styles.subscriptionCard}>
+            <View style={styles.cardHeader}>
+              <Text style={styles.planName}>
+                {subscriptionData.type === 'yearly'
+                  ? 'Yearly Plan'
+                  : subscriptionData.type === 'monthly'
+                  ? 'Monthly Plan'
+                  : 'No Active Subscription'}
               </Text>
+              {subscriptionData.type && (
+                <>
+                  <Text style={styles.planPrice}>{subscriptionData.price}</Text>
+                  <Text style={styles.renewalText}>
+                    {subscriptionData.nextRenewal === 'N/A'
+                      ? 'No active subscription'
+                      : `Renews on ${subscriptionData.nextRenewal}`}
+                  </Text>
+                </>
+              )}
             </View>
-          )}
-        </View>
-      </View>
 
-      {/* Action Buttons */}
-      <View style={styles.buttonContainer}>
-        <Pressable
-          style={[styles.actionButton, styles.secondaryButton]}
-          onPress={() =>
-            navigation.navigate('ChooseSubscriptionScreen', {
-              returnToDashboard: true,
-            })
-          }>
-          <Text style={[styles.buttonText, {color: colors.black}]}>
-            {subscriptionData.type ? 'Change Plan' : 'Subscribe Now'}
-          </Text>
-        </Pressable>
+            <View style={styles.divider} />
 
-        {/*{subscriptionData.type && (
+            <View style={styles.benefitsContainer}>
+              <Text style={styles.benefitsTitle}>
+                {subscriptionData.type ? 'Plan Benefits:' : 'Basic Features:'}
+              </Text>
+              {subscriptionData.benefits.map((benefit, index) => (
+                <View key={index} style={styles.benefitItem}>
+                  <Image
+                    source={AppImages.check_circle}
+                    style={styles.benefitIcon}
+                  />
+                  <Text style={styles.benefitText}>{benefit}</Text>
+                </View>
+              ))}
+              {subscriptionData.type === 'yearly' && (
+                <View style={styles.benefitItem}>
+                  <Image
+                    source={AppImages.check_circle}
+                    style={styles.benefitIcon}
+                  />
+                  <Text style={styles.benefitText}>
+                    20% discount compared to monthly
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
+
+          {/* Action Buttons */}
+          <View style={styles.buttonContainer}>
+            <Pressable
+              style={[styles.actionButton, styles.secondaryButton]}
+              onPress={() =>
+                navigation.navigate('ChooseSubscriptionScreen', {
+                  returnToDashboard: true,
+                })
+              }>
+              <Text style={[styles.buttonText, {color: colors.black}]}>
+                {subscriptionData.type ? 'Change Plan' : 'Subscribe Now'}
+              </Text>
+            </Pressable>
+
+            {/*{subscriptionData.type && (
           <Pressable
             style={[styles.actionButton, styles.secondaryButton]}
             onPress={() => console.log('Manage subscription')}>
@@ -211,15 +215,16 @@ export const SubscriptionScreen = ({navigation}) => {
             </Text>
           </Pressable>
         )}*/}
-      </View>
+          </View>
 
-      {/* Additional Info */}
-      <Text style={styles.infoText}>
-        {subscriptionData.type
-          ? 'Your subscription will automatically renew unless canceled at least 24 hours before the end of the current period.'
-          : 'Upgrade to unlock premium features and capabilities.'}
-      </Text>
-    </ImageBackground>
+          {/* Additional Info */}
+          <Text style={styles.infoText}>
+            {subscriptionData.type
+              ? 'Your subscription will automatically renew unless canceled at least 24 hours before the end of the current period.'
+              : 'Upgrade to unlock premium features and capabilities.'}
+          </Text>
+        </View>
+      }></AppImageBackgroundContainer>
   );
 };
 

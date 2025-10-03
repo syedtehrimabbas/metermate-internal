@@ -1,5 +1,6 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
+  ActivityIndicator,
   FlatList,
   Image,
   Pressable,
@@ -17,8 +18,10 @@ import {getScaledHeight, scaledFontWidth} from '../../../utils/AppUtils.js';
 import {hp} from '../../../utils/Dimension.js';
 import {AppFonts} from '../../../fonts';
 import {supabase} from '../../../utils/supabase.ts';
-import AppContainer from '../../../components/AppContainer';
 import {useSelector} from 'react-redux';
+import {useFocusEffect} from '@react-navigation/native';
+import AppImageBackgroundContainer from '../../../components/AppImageBackgroundContainer';
+import MyProfileScreen from '../../profile/MyProfile.tsx';
 
 function ProvidersSection({filteredProviders, renderProvider}) {
   return (
@@ -59,7 +62,10 @@ function ProvidersSection({filteredProviders, renderProvider}) {
   );
 }
 
-const SearchElectricProviders = ({navigation}) => {
+type Props = {
+  navigation: any;
+};
+const SearchElectricProviders = ({navigation}: Props) => {
   const [search, setSearch] = useState('');
   const [zipcodes, setZipcodes] = useState([]);
   const [filteredZipcodes, setFilteredZipcodes] = useState([]);
@@ -69,7 +75,32 @@ const SearchElectricProviders = ({navigation}) => {
   const dummyLogo = AppImages.dummy_company_logo_one; // Placeholder for logo path
   const [lastSelectedZipcode, setLastSelectedZipcode] = useState(''); // State to store the last selected zipcode
   const [loading, setLoading] = useState(false);
-  const {userObject} = useSelector((state: any) => state.userInfo);
+  const reduxUserObject = useSelector(
+    (state: any) => state.userInfo.userObject,
+  );
+  const [userObject, setUserObject] = useState(reduxUserObject);
+
+  useFocusEffect(
+    useCallback(() => {
+      setUserObject(reduxUserObject); // sync with latest Redux value on focus
+    }, [reduxUserObject]),
+  );
+
+  const [imageLoading, setImageLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
+  const [imageSource, setImageSource] = useState(
+    !imageError && userObject?.localUserData?.profile_photo
+      ? {uri: userObject.localUserData.profile_photo}
+      : AppImages.user_placeholder_default,
+  );
+
+  useEffect(() => {
+    if (!imageError && userObject?.localUserData?.profile_photo) {
+      setImageSource({uri: userObject.localUserData.profile_photo});
+    } else {
+      setImageSource(AppImages.user_placeholder_default);
+    }
+  }, [userObject, imageError]);
 
   // Fetch zip codes from Supabase
   useEffect(() => {
@@ -227,33 +258,62 @@ const SearchElectricProviders = ({navigation}) => {
     </TouchableOpacity>
   );
 
+  function haveZipcodeError() {
+    return (
+      filteredProviders &&
+      filteredProviders.length === 0 &&
+      search.length !== 0 &&
+      filteredZipcodes.length === 0
+    );
+  }
+
   return (
-    <AppContainer
-      loading={loading}
+    <AppImageBackgroundContainer
+      backgroundImage={AppImages.lines_vector}
+      backgroundColor={Colors.accentColor}
+      loading={false}
       children={
         <View style={styles.container}>
-          <TouchableOpacity
-            style={{
-              width: scaledFontWidth(24),
-              height: getScaledHeight(24),
-              marginBottom: hp(2),
-            }}
-            onPress={() => {
-              navigation.goBack();
-            }}>
-            <Image
-              source={AppImages.back_arrow}
-              style={{
-                width: scaledFontWidth(24),
-                height: getScaledHeight(24),
-              }}
-            />
-          </TouchableOpacity>
-
+          <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
+            <Pressable
+              style={styles.parent}
+              onPress={() => {
+                navigation.navigate(MyProfileScreen);
+              }}>
+              <View style={styles.imageContainer}>
+                {imageLoading && !imageError && (
+                  <ActivityIndicator
+                    style={styles.loader}
+                    size="large"
+                    color="#888"
+                  />
+                )}
+                <Image
+                  style={{
+                    borderRadius: 100,
+                    flex: 1,
+                    height: '100%',
+                    overflow: 'hidden',
+                    width: '100%',
+                    backgroundColor: 'rgba(151, 148, 148, 0.46)',
+                  }}
+                  resizeMode="cover"
+                  source={imageSource}
+                  onLoadStart={() => setImageLoading(true)}
+                  onLoadEnd={() => setImageLoading(false)}
+                  onError={e => {
+                    setImageLoading(false);
+                  }}
+                />
+              </View>
+            </Pressable>
+          </View>
+          <Text style={styles.findText}>Find</Text>
+          <Text style={styles.electricProviderLabel}>Electric Provider</Text>
           {/* Search Bar */}
           <View style={styles.searchBarContainer}>
             <TextInput
-              style={styles.searchInput}
+              style={[styles.searchInput, {color: haveZipcodeError() ? '#EA4335' : colors.textColorGrey  }]}
               placeholder="Search Zipcode"
               value={search}
               onChangeText={handleSearch}
@@ -289,33 +349,31 @@ const SearchElectricProviders = ({navigation}) => {
             filteredProviders={filteredProviders}
             renderProvider={renderProvider}
           />
-          {filteredProviders &&
-            filteredProviders.length === 0 &&
-            search.length !== 0 &&
-            filteredZipcodes.length === 0 && (
-              <View
-                style={{
-                  width: 200,
-                  height: 40,
-                  backgroundColor: Colors.white,
-                  borderRadius: 20,
-                  alignSelf: 'center',
-                  marginTop: hp(35),
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <Text
-                  style={[
-                    styles.providerName,
-                    {
-                      color: '#EA4335',
-                      fontFamily: AppFonts.inter_regular,
-                    },
-                  ]}>
-                  {'Incorrect zipcode'}
-                </Text>
-              </View>
-            )}
+          {haveZipcodeError() && (
+            <View
+              style={{
+                width: 200,
+                height: 40,
+                backgroundColor: Colors.white,
+                borderRadius: 20,
+                alignSelf: 'center',
+                marginTop: hp(35),
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <Text
+                style={[
+                  styles.providerName,
+                  {
+                    color: '#EA4335',
+                    fontWeight: '400',
+                    fontFamily: AppFonts.inter_regular,
+                  },
+                ]}>
+                {'Incorrect zipcode'}
+              </Text>
+            </View>
+          )}
         </View>
       }
     />
@@ -326,7 +384,24 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#F5F5F5',
+  },
+  parent: {
+    height: 48,
+    width: 48,
+  },
+  parentFlexBox: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  imageContainer: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loader: {
+    position: 'absolute',
+    zIndex: 1,
   },
   searchBarContainer: {
     position: 'relative',
@@ -334,8 +409,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     borderRadius: 16,
     paddingHorizontal: 12,
-    height: 50,
+    height: getScaledHeight(50),
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
   },
   searchInput: {
@@ -406,6 +482,39 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accentColor,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+
+  logIn04Parent: {
+    width: 63,
+    flexDirection: 'row',
+    gap: 6,
+  },
+  frameParent: {
+    borderRadius: 118,
+    backgroundColor: 'rgba(0, 0, 0, 0.06)',
+    width: 120,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    overflow: 'hidden',
+  },
+  findText: {
+    fontSize: scaledFontWidth(13),
+    letterSpacing: 0,
+    lineHeight: 20,
+    fontFamily: AppFonts.general_regular,
+    color: colors.textColor,
+    textAlign: 'left',
+    marginTop: 20,
+  },
+  electricProviderLabel: {
+    fontSize: scaledFontWidth(28),
+    letterSpacing: -0.6,
+    lineHeight: 34,
+    fontWeight: '500',
+    fontFamily: AppFonts.general_regular,
+    color: colors.textColor,
+    textAlign: 'left',
+    marginVertical: 20,
   },
 });
 

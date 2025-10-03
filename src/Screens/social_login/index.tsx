@@ -297,7 +297,6 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
     height: '100%',
-    backgroundColor: colors.white,
     flex: 1,
     overflow: 'hidden',
     alignItems: 'center', // Center the content horizontally
@@ -317,7 +316,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 1,
     alignItems: 'center',
-    backgroundColor: '#fff',
     borderStyle: 'solid',
     borderColor: '#ededed',
     borderTopWidth: 0.5,

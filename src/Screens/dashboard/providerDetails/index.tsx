@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {
   Image,
   Linking,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -12,6 +13,9 @@ import {getScaledHeight, scaledFontWidth} from '../../../utils/AppUtils';
 import {AppImages} from '../../../images';
 import colors from '../../../theme/colors';
 import {AppFonts} from '../../../fonts';
+import AppContainer from '../../../components/AppContainer';
+import {hp} from '../../../utils/Dimension';
+import SearchElectricProviders from '../searchproviders';
 
 const ProviderDetailsScreen = ({route, navigation}) => {
   const [provider_name, set_provider_name] = useState('');
@@ -252,39 +256,42 @@ const ProviderDetailsScreen = ({route, navigation}) => {
       </View>
     );
   };
-
   return (
-    <ScrollView style={styles.container}>
-      <TouchableOpacity
-        style={{
-          flex: 1,
-          marginTop: 10,
-          marginRight: 10,
-          alignSelf: 'flex-end',
-          width: scaledFontWidth(30),
-          height: getScaledHeight(30),
-        }}
-        onPress={() => {
-          navigation.goBack();
-        }}>
-        <Image
-          source={AppImages.ic_cross}
-          style={{
-            width: scaledFontWidth(24),
-            height: getScaledHeight(24),
-          }}
-        />
-      </TouchableOpacity>
-      {renderProvider()}
+    <AppContainer
+      children={
+        <ScrollView style={styles.container}>
+          <View style={styles.header}>
+            <Pressable
+              style={styles.backButton}
+              onPress={() => navigation.goBack()}>
+              <Image
+                style={styles.backIcon}
+                resizeMode="contain"
+                source={AppImages.back_arrow}
+              />
+            </Pressable>
+            <Text style={styles.headerTitle}>Provider Details</Text>
+            <Pressable
+              style={styles.backButton}>
+              <Image
+                style={{
+                    width: 0,
+                    height: 0}}
+                resizeMode="contain"
+                source={AppImages.ic_cross}
+              />
+            </Pressable>
+          </View>
+          {renderProvider()}
 
-      {/* Energy Rate Details */}
-      {EnergyRateDetails()}
+          {/* Energy Rate Details */}
+          {EnergyRateDetails()}
 
-      {/* Net Metering Program Details */}
-      {NetMeteringDetails()}
+          {/* Net Metering Program Details */}
+          {NetMeteringDetails()}
 
-      {/* Benefits Section */}
-      {/*<View style={styles.section}>
+          {/* Benefits Section */}
+          {/*<View style={styles.section}>
         <Text style={styles.sectionTitle}>Benefits of the Program</Text>
         <View style={styles.benefitsList}>
           <Text style={styles.benefitItem}>
@@ -305,14 +312,15 @@ const ProviderDetailsScreen = ({route, navigation}) => {
           </Text>
         </View>
       </View>*/}
-    </ScrollView>
+        </ScrollView>
+      }
+    />
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
   },
   providerCard: {
     backgroundColor: 'white',
@@ -427,6 +435,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     lineHeight: 20,
+  },
+
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: hp(3),
+    paddingHorizontal: 10,
+  },
+  backButton: {
+    width: 30,
+    height: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  backIcon: {
+    width: 24,
+    height: 24,
+    tintColor: colors.black,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontFamily: AppFonts.general_regular,
+    color: colors.black,
   },
 });
 

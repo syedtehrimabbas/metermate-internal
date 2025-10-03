@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   Alert,
   Image,
-  ImageBackground,
   Platform,
   Pressable,
   ScrollView,
@@ -29,9 +28,11 @@ import {AppInput} from '../../../components/AppInput.js';
 import {useDispatch, useSelector} from 'react-redux';
 import {supabase} from '../../../utils/supabase.ts';
 import {launchImageLibrary} from 'react-native-image-picker';
-import AppContainer from '../../../components/AppContainer';
 import {updateUser} from '../../../redux';
 import SearchElectricProviders from '../../dashboard/searchproviders';
+import AppImageBackgroundContainer from '../../../components/AppImageBackgroundContainer';
+import Colors from '../../../theme/colors';
+import Dashboard from "../../dashboard";
 
 type Props = {
   navigation: any;
@@ -260,130 +261,127 @@ const EditProfileScreen = ({navigation}: Props) => {
   };
 
   return (
-    <AppContainer
-      loading={loading}
+    <AppImageBackgroundContainer
+      backgroundImage={AppImages.lines_vector}
+      backgroundColor={Colors.white}
+      loading={false}
       children={
-        <ImageBackground
-          style={styles.container}
-          source={AppImages.lines_vector}
-          resizeMode={'cover'}>
-          <ScrollView
-            style={{flex: 1, height: '100%'}}
-            showsVerticalScrollIndicator={false}>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}>
-              <Pressable
-                style={[styles.parent]}
-                onPress={() => {
-                  navigation.goBack();
-                }}>
-                <Image
-                  style={styles.icon}
-                  resizeMode="cover"
-                  source={AppImages.back_arrow}
-                />
-              </Pressable>
-              <Text style={styles.editAccount}>{'Edit Account'}</Text>
-              <Pressable
-                style={[styles.parent]}
-                onPress={() => {
-                  navigation.navigate(SearchElectricProviders);
-                }}>
-                <Image
-                  style={styles.icon}
-                  resizeMode="cover"
-                  source={AppImages.ic_cross}
-                />
-              </Pressable>
-            </View>
-
-            <View style={{alignSelf: 'center', marginTop: hp(10)}}>
-              <View style={styles.imageContainer}>
-                {imageLoading && !imageError && (
-                  <ActivityIndicator
-                    style={styles.loader}
-                    size="large"
-                    color="#888"
-                  />
-                )}
-                <Image
-                  style={styles.icon}
-                  resizeMode="cover"
-                  source={imageSource}
-                  onLoadStart={() => setImageLoading(true)}
-                  onLoadEnd={() => setImageLoading(false)}
-                  onError={() => {
-                    setImageLoading(false);
-                    // setImageError(true);
-                  }}
-                />
-              </View>
-              <TouchableOpacity
-                onPress={() => {
-                  handleImagePicker();
-                }}>
-                <Image
-                  style={{
-                    width: 28,
-                    height: 28,
-                    resizeMode: 'contain',
-                    position: 'absolute',
-                    bottom: 0,
-                    right: 5,
-                  }}
-                  source={AppImages.ic_camera}
-                />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.userName}>{userData.localUserData.name}</Text>
-
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: 7,
-                alignSelf: 'center',
-                marginBottom: hp(3),
+        <ScrollView
+          style={{flex: 1, height: '100%', padding: 20}}
+          showsVerticalScrollIndicator={false}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}>
+            <Pressable
+              style={[styles.parent]}
+              onPress={() => {
+                navigation.goBack();
               }}>
               <Image
-                style={styles.giftCardIcon}
+                style={styles.icon}
                 resizeMode="cover"
-                source={AppImages.ic_gift}
+                source={AppImages.back_arrow}
               />
-              <Text
-                style={
-                  styles.freeTrial
-                }>{`${activeSubscription} Subscription`}</Text>
-            </View>
-            <AppInput
-              placeholder={'Full Name'}
-              onChangeText={text => {
-                Name(text);
-                setIsNameChanged(text !== initialName);
-              }}
-              value={name}
-              keyboardType={'default'}
-              returnKeyType="next"
-              marginTop={10}
-              onSubmitEditing={() => emailInputRef.current?.focus()} // Move focus to email input
-            />
+            </Pressable>
+            <Text style={styles.editAccount}>{'Edit Account'}</Text>
+            <Pressable
+              style={[styles.parent]}
+              onPress={() => {
+                navigation.navigate(Dashboard);
+              }}>
+              <Image
+                style={styles.icon}
+                resizeMode="cover"
+                source={AppImages.ic_cross}
+              />
+            </Pressable>
+          </View>
 
-            <AppInput
-              ref={emailInputRef} // Attach ref to the email input
-              placeholder={'Email'}
-              onChangeText={text => Email(text)}
-              value={email}
-              editable={false}
-              keyboardType={'email-address'}
-              returnKeyType="next"
-              onSubmitEditing={() => passwordIRef.current?.focus()}
+          <View style={{alignSelf: 'center', marginTop: hp(10)}}>
+            <TouchableOpacity
+              style={styles.imageContainer}
+              onPress={() => {
+                handleImagePicker();
+              }}>
+              {imageLoading && !imageError && (
+                <ActivityIndicator
+                  style={styles.loader}
+                  size="large"
+                  color="#888"
+                />
+              )}
+              <Image
+                style={styles.icon}
+                resizeMode="cover"
+                source={imageSource}
+                onLoadStart={() => setImageLoading(true)}
+                onLoadEnd={() => setImageLoading(false)}
+                onError={() => {
+                  setImageLoading(false);
+                  // setImageError(true);
+                }}
+              />
+            </TouchableOpacity>
+            <Image
+              style={{
+                width: 28,
+                height: 28,
+                resizeMode: 'contain',
+                position: 'absolute',
+                bottom: 0,
+                right: 5,
+              }}
+              source={AppImages.ic_camera}
             />
-            {/* <AppInput
+          </View>
+          <Text style={styles.userName}>{userData.localUserData.name}</Text>
+
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: 7,
+              alignSelf: 'center',
+              marginBottom: hp(3),
+            }}>
+            <Image
+              style={styles.giftCardIcon}
+              resizeMode="cover"
+              source={AppImages.ic_gift}
+            />
+            <Text
+              style={
+                styles.freeTrial
+              }>{`${activeSubscription} Subscription`}</Text>
+          </View>
+          <AppInput
+            placeholder={'Full Name'}
+            onChangeText={text => {
+              Name(text);
+              setIsNameChanged(text !== initialName);
+            }}
+            value={name}
+            keyboardType={'default'}
+            returnKeyType="next"
+            marginTop={10}
+            onSubmitEditing={() => emailInputRef.current?.focus()} // Move focus to email input
+          />
+
+          <AppInput
+            ref={emailInputRef} // Attach ref to the email input
+            placeholder={'Email'}
+            onChangeText={text => Email(text)}
+            value={email}
+            editable={false}
+            keyboardType={'email-address'}
+            returnKeyType="next"
+            onSubmitEditing={() => passwordIRef.current?.focus()}
+          />
+          {/* <AppInput
                             ref={passwordIRef}
                             placeholder={'Password'}
                             onChangeText={text => Password(text)}
@@ -405,22 +403,21 @@ const EditProfileScreen = ({navigation}: Props) => {
                             onSubmitEditing={() => Keyboard.dismiss} // Move focus to email input
                         /> */}
 
-            <AppButton
-              onPress={() => {
-                handleProfileUpdate();
-              }}
-              width={wp(90)}
-              height={50}
-              label={'Save Changes'}
-              textColor={colors.black}
-              backgroundColor={
-                isNameChanged ? colors.accentColor : colors.lightgrey
-              }
-              isDisable={!isNameChanged}
-              styles={{marginTop: hp(10)}}
-            />
-          </ScrollView>
-        </ImageBackground>
+          <AppButton
+            onPress={() => {
+              handleProfileUpdate();
+            }}
+            width={wp(90)}
+            height={50}
+            label={'Save Changes'}
+            textColor={colors.black}
+            backgroundColor={
+              isNameChanged ? colors.accentColor : colors.lightgrey
+            }
+            isDisable={!isNameChanged}
+            styles={{marginTop: hp(10)}}
+          />
+        </ScrollView>
       }
     />
   );

@@ -24,6 +24,7 @@ import {
   requestSubscription,
 } from 'react-native-iap';
 import {CommonActions} from '@react-navigation/native';
+import AppContainer from '../../components/AppContainer';
 
 type FeatureProps = {
   title: string;
@@ -395,200 +396,209 @@ const ChooseSubscriptionScreen = ({
   };
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        style={{
-          alignSelf: 'flex-end',
-          width: scaledFontWidth(24),
-          height: getScaledHeight(24),
-        }}
-        onPress={() => {
-          navigation.goBack();
-        }}>
-        <Image
-          source={AppImages.ic_cross}
-          style={{
-            width: scaledFontWidth(24),
-            height: getScaledHeight(24),
-          }}
-        />
-      </TouchableOpacity>
-
-      <Text style={styles.subscription}>Subscription</Text>
-      <PackageItem
-        onPress={() => {
-          SelectPackage('annual');
-        }}
-        selected={selectedPackage === 'annual'}
-        price={'$180'}
-        type={'Annual'}
-        subtitle={'/year Pro Member'}
-      />
-
-      <PackageItem
-        onPress={() => {
-          SelectPackage('monthly');
-        }}
-        selected={selectedPackage === 'monthly'}
-        price={'$20'}
-        type={'Monthly'}
-        subtitle={'/month Basic member'}
-      />
-
-      <RBSheet
-        ref={paymentSheetRef}
-        height={hp(45)}
-        closeOnDragDown={false}
-        closeOnPressMask={true}
-        draggable={true}
-        customStyles={{
-          wrapper: {
-            backgroundColor: 'transparent',
-            opacity: 1,
-          },
-          draggableIcon: {
-            backgroundColor: colors.draggableIconColor,
-          },
-          container: {
-            backgroundColor: colors.white,
-            borderTopLeftRadius: 30,
-            borderTopRightRadius: 30,
-            padding: 24,
-          },
-        }}
-        customModalProps={{
-          animationType: 'slide',
-          statusBarTranslucent: true,
-        }}>
-        <View style={{backgroundColor: colors.white}}>
-          <View
+    <AppContainer
+      loading={isLoading}
+      children={
+        <View style={styles.container}>
+          <TouchableOpacity
             style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
+              alignSelf: 'flex-end',
+              width: scaledFontWidth(24),
+              height: getScaledHeight(24),
+            }}
+            onPress={() => {
+              navigation.goBack();
             }}>
-            <Text
-              style={[
-                styles.paymentPlanText,
-                {
-                  textAlignVertical: 'center',
-                  textAlign: 'center',
-                },
-              ]}>
-              {`${
-                selectedPackage === 'annual'
-                  ? yearlyData.subscriptionType
-                  : monthlyData.subscriptionType
-              } plan offer`}
-            </Text>
-
-            <TouchableOpacity
+            <Image
+              source={AppImages.ic_cross}
               style={{
                 width: scaledFontWidth(24),
                 height: getScaledHeight(24),
-                justifyContent: 'center',
-                alignItems: 'center',
               }}
-              onPress={() => {
-                paymentSheetRef.current?.close();
-              }}>
-              <Image
-                source={AppImages.ic_cross}
-                style={{
-                  width: scaledFontWidth(24),
-                  height: getScaledHeight(24),
-                }}
-              />
-            </TouchableOpacity>
-          </View>
-
-          <Text style={styles.paymentPlanText1}>{`Are you sure to pay ${
-            selectedPackage === 'annual' ? yearlyData.price : monthlyData.price
-          }$ for ${
-            selectedPackage === 'annual'
-              ? yearlyData.description
-              : monthlyData.description
-          }`}</Text>
-
-          <TouchableOpacity
-            onPress={
-              selectedPackage === 'annual'
-                ? requestYearlySubscription
-                : requestMonthlySubscription
-            }
-            style={{
-              marginTop: 20,
-              width: wp(50),
-              height: 50,
-              borderRadius: 100,
-              backgroundColor: colors.white,
-              elevation: 2,
-              alignSelf: 'center',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexDirection: 'row',
-            }}>
-            <Image
-              style={{
-                width: 20,
-                height: 20,
-                resizeMode: 'contain',
-              }}
-              source={
-                Platform.OS === 'android' ? AppImages.google : AppImages.apple
-              }
             />
-            <Text
-              style={{
-                fontSize: 12,
-                fontWeight: '500',
-                fontFamily: AppFonts.general_regular,
-                color: colors.textColor,
-                textAlign: 'center',
-                marginStart: 10,
-              }}>
-              {Platform.OS === 'android' ? 'Google Pay' : 'Apple pay'}
-            </Text>
           </TouchableOpacity>
-        </View>
-      </RBSheet>
 
-      {/*paymentSheetRef.current?.close();
+          <Text style={styles.subscription}>Subscription</Text>
+          <PackageItem
+            onPress={() => {
+              SelectPackage('annual');
+            }}
+            selected={selectedPackage === 'annual'}
+            price={'$180'}
+            type={'Annual'}
+            subtitle={'/year Pro Member'}
+          />
+
+          <PackageItem
+            onPress={() => {
+              SelectPackage('monthly');
+            }}
+            selected={selectedPackage === 'monthly'}
+            price={'$20'}
+            type={'Monthly'}
+            subtitle={'/month Basic member'}
+          />
+
+          <RBSheet
+            ref={paymentSheetRef}
+            height={hp(45)}
+            closeOnDragDown={false}
+            closeOnPressMask={true}
+            draggable={true}
+            customStyles={{
+              wrapper: {
+                backgroundColor: 'transparent',
+                opacity: 1,
+              },
+              draggableIcon: {
+                backgroundColor: colors.draggableIconColor,
+              },
+              container: {
+                backgroundColor: colors.white,
+                borderTopLeftRadius: 30,
+                borderTopRightRadius: 30,
+                padding: 24,
+              },
+            }}
+            customModalProps={{
+              animationType: 'slide',
+              statusBarTranslucent: true,
+            }}>
+            <View style={{backgroundColor: colors.white}}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}>
+                <Text
+                  style={[
+                    styles.paymentPlanText,
+                    {
+                      textAlignVertical: 'center',
+                      textAlign: 'center',
+                    },
+                  ]}>
+                  {`${
+                    selectedPackage === 'annual'
+                      ? yearlyData.subscriptionType
+                      : monthlyData.subscriptionType
+                  } plan offer`}
+                </Text>
+
+                <TouchableOpacity
+                  style={{
+                    width: scaledFontWidth(24),
+                    height: getScaledHeight(24),
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                  onPress={() => {
+                    paymentSheetRef.current?.close();
+                  }}>
+                  <Image
+                    source={AppImages.ic_cross}
+                    style={{
+                      width: scaledFontWidth(24),
+                      height: getScaledHeight(24),
+                    }}
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.paymentPlanText1}>{`Are you sure to pay ${
+                selectedPackage === 'annual'
+                  ? yearlyData.price
+                  : monthlyData.price
+              }$ for ${
+                selectedPackage === 'annual'
+                  ? yearlyData.description
+                  : monthlyData.description
+              }`}</Text>
+
+              <TouchableOpacity
+                onPress={
+                  selectedPackage === 'annual'
+                    ? requestYearlySubscription
+                    : requestMonthlySubscription
+                }
+                style={{
+                  marginTop: 20,
+                  width: wp(50),
+                  height: 50,
+                  borderRadius: 100,
+                  backgroundColor: colors.white,
+                  elevation: 2,
+                  alignSelf: 'center',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexDirection: 'row',
+                }}>
+                <Image
+                  style={{
+                    width: 20,
+                    height: 20,
+                    resizeMode: 'contain',
+                  }}
+                  source={
+                    Platform.OS === 'android'
+                      ? AppImages.google
+                      : AppImages.apple
+                  }
+                />
+                <Text
+                  style={{
+                    fontSize: 12,
+                    fontWeight: '500',
+                    fontFamily: AppFonts.general_regular,
+                    color: colors.textColor,
+                    textAlign: 'center',
+                    marginStart: 10,
+                  }}>
+                  {Platform.OS === 'android' ? 'Google Pay' : 'Apple pay'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </RBSheet>
+
+          {/*paymentSheetRef.current?.close();
         navigation.navigate(PaymentCompletedScreen);*/}
-      {isLoading ? (
-        <View style={{alignItems: 'center', padding: 20}}>
-          <Text>Loading subscription options...</Text>
+          {isLoading ? (
+            <View style={{alignItems: 'center', padding: 20}}>
+              <Text>Loading subscription options...</Text>
+            </View>
+          ) : error ? (
+            <View style={{alignItems: 'center', padding: 20}}>
+              {/*<Text style={{color: 'red', marginBottom: 10}}>{error}</Text>*/}
+              {/*<AppButton*/}
+              {/*  onPress={handleGetProducts}*/}
+              {/*  width={wp(90)}*/}
+              {/*  height={50}*/}
+              {/*  label={'Retry Loading Subscriptions'}*/}
+              {/*  textColor={colors.black}*/}
+              {/*  backgroundColor={colors.accentColor}*/}
+              {/*/>*/}
+            </View>
+          ) : (
+            <AppButton
+              onPress={() => {
+                if (productsData.length === 0) {
+                  setError('No subscription products available');
+                  return;
+                }
+                paymentSheetRef.current?.open();
+              }}
+              width={wp(90)}
+              height={50}
+              label={'Continue'}
+              textColor={colors.black}
+              backgroundColor={colors.accentColor}
+              disabled={productsData.length === 0}
+            />
+          )}
         </View>
-      ) : error ? (
-        <View style={{alignItems: 'center', padding: 20}}>
-          {/*<Text style={{color: 'red', marginBottom: 10}}>{error}</Text>*/}
-          {/*<AppButton*/}
-          {/*  onPress={handleGetProducts}*/}
-          {/*  width={wp(90)}*/}
-          {/*  height={50}*/}
-          {/*  label={'Retry Loading Subscriptions'}*/}
-          {/*  textColor={colors.black}*/}
-          {/*  backgroundColor={colors.accentColor}*/}
-          {/*/>*/}
-        </View>
-      ) : (
-        <AppButton
-          onPress={() => {
-            if (productsData.length === 0) {
-              setError('No subscription products available');
-              return;
-            }
-            paymentSheetRef.current?.open();
-          }}
-          width={wp(90)}
-          height={50}
-          label={'Continue'}
-          textColor={colors.black}
-          backgroundColor={colors.accentColor}
-          disabled={productsData.length === 0}
-        />
-      )}
-    </View>
+      }
+    />
   );
 };
 
@@ -596,7 +606,7 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
     height: '100%',
-    backgroundColor: colors.inputbg,
+    backgroundColor: colors.white,
     flex: 1,
     overflow: 'hidden',
     padding: 20,

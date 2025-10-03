@@ -9,7 +9,9 @@ import SearchElectricProviders from '../Screens/dashboard/searchproviders';
 import MyProfileScreen from '../Screens/profile/MyProfile.tsx';
 import EditProfileScreen from '../Screens/profile/edit_profile';
 import ProviderDetailsScreen from '../Screens/dashboard/providerDetails';
-import {SubscriptionScreen} from "../Screens/subscriptions";
+import {SubscriptionScreen} from '../Screens/subscriptions';
+import ForgotPassword from '../Screens/forgotPassword';
+import { ResetPasswordScreen } from '../Screens/resetPassword';
 
 const AuthenticationStack = {
   LoginScreen,
@@ -17,6 +19,8 @@ const AuthenticationStack = {
   SignupScreen,
   ChooseSubscriptionScreen,
   PaymentCompletedScreen,
+  ForgotPassword,
+  ResetPasswordScreen,
 };
 const AppStack = {
     Dashboard,

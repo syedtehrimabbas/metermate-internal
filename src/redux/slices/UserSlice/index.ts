@@ -1,6 +1,7 @@
 import type {PayloadAction} from '@reduxjs/toolkit';
 import {createSlice} from '@reduxjs/toolkit';
 import MeterMateEncryptedStorage from '../../../LocalStorage';
+import {supabase} from '../../../utils/supabase.ts';
 
 export type SubscriptionStatus = 'active' | 'expired' | 'cancelled';
 
@@ -97,7 +98,9 @@ export const userSlice = createSlice({
     },
     clearUser: state => {
       state.userObject = getInitState();
-      MeterMateEncryptedStorage.clearAll().then(r => {});
+      MeterMateEncryptedStorage.clearAll().then(r => {
+        supabase.auth.signOut();
+      });
     },
     updateSubscription: (
       state,

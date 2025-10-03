@@ -2,30 +2,31 @@ import React from 'react';
 import {
   ImageBackground,
   Platform,
-  SafeAreaView,
   StatusBar,
   StyleSheet,
-  useColorScheme,
   View,
 } from 'react-native';
 import Loader from './Loader';
 import Colors from '../theme/colors';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-const AppImageBackgroundContainer = ({children, loading, backgroundImage}) => {
-  const isDarkMode = useColorScheme() === 'dark';
-
+const AppImageBackgroundContainer = ({
+  children,
+  loading,
+  backgroundImage,
+  backgroundColor  = Colors.white,
+}) => {
   return (
-    <View style={styles.rootContainer}>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: backgroundColor
+      }}>
       <ImageBackground
         source={backgroundImage}
         style={styles.backgroundImage}
         resizeMode="cover">
-        <StatusBar
-          barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-          backgroundColor="transparent"
-          translucent
-        />
-        <SafeAreaView style={styles.safeArea}>
+        <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
           <Loader loading={loading} />
           {children}
         </SafeAreaView>
@@ -35,10 +36,6 @@ const AppImageBackgroundContainer = ({children, loading, backgroundImage}) => {
 };
 
 const styles = StyleSheet.create({
-  rootContainer: {
-    flex: 1,
-    backgroundColor: Colors.accentColor,
-  },
   backgroundImage: {
     flex: 1,
     width: '100%',

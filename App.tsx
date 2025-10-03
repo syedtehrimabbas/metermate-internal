@@ -40,19 +40,15 @@ function App(): React.JSX.Element {
     backgroundColor: isDarkMode ? Colors.primaryDarkColor : Colors.primaryColor,
   };
   return (
-    // <GestureHandlerRootView style={{flex: 1}}>
     <Provider store={store}>
       <SafeAreaProvider>
-        <SafeAreaView />
         <StatusBar
           barStyle={isDarkMode ? 'light-content' : 'dark-content'}
           backgroundColor={backgroundStyle.backgroundColor}
         />
         <RootNavigation />
-        <SafeAreaView />
       </SafeAreaProvider>
     </Provider>
-    // </GestureHandlerRootView>
   );
 }
 

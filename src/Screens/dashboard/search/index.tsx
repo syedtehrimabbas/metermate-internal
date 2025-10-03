@@ -16,6 +16,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import MyProfileScreen from '../../profile/MyProfile.tsx';
 import {useFocusEffect} from '@react-navigation/native';
 import AppImageBackgroundContainer from '../../../components/AppImageBackgroundContainer';
+import Colors from '../../../theme/colors.js';
 
 type Props = {
   navigation: any;
@@ -51,6 +52,7 @@ const SearchScreen = ({navigation}: Props) => {
   return (
     <AppImageBackgroundContainer
       backgroundImage={AppImages.lines_vector}
+      backgroundColor={Colors.accentColor}
       loading={false}
       children={
         <View style={styles.container}>

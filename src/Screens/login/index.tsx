@@ -3,8 +3,6 @@ import {
   Alert,
   Image,
   Keyboard,
-  KeyboardAvoidingView,
-  Platform,
   StyleSheet,
   Text,
   TouchableWithoutFeedback,
@@ -21,6 +19,7 @@ import {useDispatch} from 'react-redux';
 import {updateUser} from '../../redux';
 import {supabase} from '../../utils/supabase.ts';
 import AppContainer from '../../components/AppContainer';
+import {KeyboardShift} from '../../utils/KeyboardShift.tsx';
 
 type Props = {
   navigation: any;
@@ -32,6 +31,7 @@ const LoginScreen = ({navigation}: Props) => {
   // const [password, Password] = useState('Hello786@');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{email?: string; password?: string}>({});
+  const [generalError, setGeneralError] = useState('');
 
   const emailInputRef = useRef(null);
   const passwordIRef = useRef(null);
@@ -77,11 +77,15 @@ const LoginScreen = ({navigation}: Props) => {
         const {data, error} = authResponse;
         const {user, session} = data;
         if (error) {
+          const newErrors: {email?: string; password?: string} = {};
+          if (error.message === 'Invalid login credentials') {
+            newErrors.email = 'Entered email is wrong';
+            newErrors.password = 'Entered password is wrong';
+            setErrors(newErrors);
+          } else {
+            setGeneralError(error.message);
+          }
           console.log(error);
-          Alert.alert(
-            error.name,
-            error.message || 'An error occurred. Please try again.',
-          );
         } else {
           try {
             // Fetch additional user data from 'user_profiles' table
@@ -118,20 +122,14 @@ const LoginScreen = ({navigation}: Props) => {
   }
 
   return (
-    <AppContainer
-      loading={loading}
-      children={
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.container}>
+    <AppContainer loading={loading}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.container}>
+          {/* Content that should shift with keyboard */}
+          <KeyboardShift>
             <View style={styles.innerContainer}>
               <Image
-                style={{
-                  width: 48,
-                  height: 48,
-                  resizeMode: 'contain',
-                }}
+                style={{width: 48, height: 48, resizeMode: 'contain'}}
                 source={AppImages.logo_png}
               />
               <Text style={styles.title}>
@@ -140,6 +138,7 @@ const LoginScreen = ({navigation}: Props) => {
               <Text style={styles.letsMakeEnergy}>
                 Let's make energy management simple and efficient.
               </Text>
+
               <View style={{width: '100%'}}>
                 <AppInput
                   ref={emailInputRef}
@@ -152,7 +151,7 @@ const LoginScreen = ({navigation}: Props) => {
                     }
                   }}
                   value={email}
-                  keyboardType={'email-address'}
+                  keyboardType="email-address"
                   returnKeyType="next"
                   onSubmitEditing={() => passwordIRef.current?.focus()}
                 />
@@ -160,11 +159,12 @@ const LoginScreen = ({navigation}: Props) => {
                   <Text style={styles.errorText}>{errors.email}</Text>
                 )}
               </View>
+
               <View style={{width: '100%'}}>
                 <AppInput
                   ref={passwordIRef}
-                  isError={errors.password}
                   placeholder={'Password'}
+                  isError={errors.password}
                   onChangeText={text => {
                     Password(text);
                     if (errors.password) {
@@ -172,25 +172,30 @@ const LoginScreen = ({navigation}: Props) => {
                     }
                   }}
                   value={password}
-                  keyboardType={'default'}
+                  keyboardType="default"
                   returnKeyType="done"
-                  isPassword={true}
+                  isPassword
                   onSubmitEditing={signInWithEmail}
                 />
                 {errors.password && (
                   <Text style={styles.errorText}>{errors.password}</Text>
                 )}
               </View>
-              {/*<Text*/}
-              {/*  style={{*/}
-              {/*    marginTop: 10,*/}
-              {/*    fontFamily: AppFonts.general_regular,*/}
-              {/*    alignSelf: 'flex-end',*/}
-              {/*    color: colors.black,*/}
-              {/*  }}>*/}
-              {/*  {'Forgot password?'}*/}
-              {/*</Text>*/}
-
+              {generalError && (
+                <Text style={styles.errorText}>{generalError}</Text>
+              )}
+              <TouchableWithoutFeedback
+                onPress={() => navigation.navigate('ForgotPassword')}>
+                <Text
+                  style={{
+                    marginTop: 10,
+                    fontFamily: AppFonts.general_regular,
+                    alignSelf: 'flex-end',
+                    color: colors.black,
+                  }}>
+                  {'Forgot password?'}
+                </Text>
+              </TouchableWithoutFeedback>
               <AppButton
                 onPress={signInWithEmail}
                 width={wp(90)}
@@ -204,35 +209,33 @@ const LoginScreen = ({navigation}: Props) => {
                 styles={{marginTop: 20}}
                 borderRadius={50}
               />
-
-              <View style={styles.rectangleView}>
-                <Text
-                  onPress={() => {
-                    navigation.navigate('SocialLogin');
-                  }}
-                  style={styles.dontHaveAn}>
-                  {'Dont have an account? '}{' '}
-                  <Text
-                    style={{
-                      color: colors.black1,
-                      textDecorationLine: 'underline',
-                    }}>
-                    {'Signup'}
-                  </Text>
-                </Text>
-              </View>
             </View>
-          </KeyboardAvoidingView>
-        </TouchableWithoutFeedback>
-      }
-    />
+          </KeyboardShift>
+
+          {/* Footer (doesn't move with keyboard) */}
+          <View style={styles.rectangleView}>
+            <Text
+              onPress={() => navigation.navigate('SocialLogin')}
+              style={styles.dontHaveAn}>
+              {"Don't have an account? "}
+              <Text
+                style={{
+                  color: colors.black1,
+                  textDecorationLine: 'underline',
+                }}>
+                Signup
+              </Text>
+            </Text>
+          </View>
+        </View>
+      </TouchableWithoutFeedback>
+    </AppContainer>
   );
 };
 const styles = StyleSheet.create({
   container: {
     width: '100%',
     height: '100%',
-    backgroundColor: colors.white,
     flex: 1,
     padding: 20,
   },
@@ -277,13 +280,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 1,
     alignItems: 'center',
-    backgroundColor: '#fff',
     borderStyle: 'solid',
-    borderColor: '#ededed',
+    borderColor: '#EDEDED',
     borderTopWidth: 0.5,
     flex: 1,
     width: '100%',
     height: getScaledHeight(70),
+    alignSelf: 'center',
   },
   errorText: {
     color: 'red',

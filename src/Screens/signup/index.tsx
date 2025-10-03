@@ -35,11 +35,12 @@ type Props = {
   navigation: any;
 };
 const SignupScreen = ({navigation}: Props) => {
-  const [email, Email] = useState('');
-  const [name, Name] = useState('');
-  const [password, Password] = useState('');
-  const [cpassword, cPassword] = useState('');
-  const [promoCode, PromoCode] = useState<string | undefined>();
+  const [email, Email] = useState('hello@gmail.com');
+  const [name, Name] = useState('Tehrim');
+  const [password, Password] = useState('Hello879@');
+  const [cpassword, cPassword] = useState('Hello879@');
+  const [promoCode, setPromoCode] = useState<string | undefined>('');
+  const [promoCodeError, setPromoCodeError] = useState<string>('');
   const [isTermsAccepted, acceptTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pickedImage, setPickedImage] = useState<Asset | null>(null);
@@ -47,6 +48,12 @@ const SignupScreen = ({navigation}: Props) => {
   const [imageSource, setImageSource] = useState(
     !imageError && '' ? {uri: ''} : AppImages.signup_image_ph,
   );
+  const [errors, setErrors] = useState<{
+    name?: string;
+    email?: string;
+    password?: string;
+    cpassword?: string;
+  }>({});
 
   const emailInputRef = useRef(null);
   const passwordIRef = useRef(null);
@@ -55,7 +62,9 @@ const SignupScreen = ({navigation}: Props) => {
   const dispatch = useDispatch();
 
   const requestAllPermissions = async () => {
-    if (Platform.OS !== 'android') return true;
+    if (Platform.OS !== 'android') {
+      return true;
+    }
 
     const permissions = [];
 
@@ -71,8 +80,9 @@ const SignupScreen = ({navigation}: Props) => {
 
     if (isAndroid13OrHigher) {
       // Also ask for video and audio if needed
-      if (PERMISSIONS.ANDROID.READ_MEDIA_VIDEO)
+      if (PERMISSIONS.ANDROID.READ_MEDIA_VIDEO) {
         permissions.push(PERMISSIONS.ANDROID.READ_MEDIA_VIDEO);
+      }
     }
 
     // Add MANAGE_EXTERNAL_STORAGE only if defined in the library
@@ -141,105 +151,129 @@ const SignupScreen = ({navigation}: Props) => {
     setImageSource({uri: imageAsset.uri});
   };
 
-  async function signUpWithEmail() {
-    // Validate name
+  const validateForm = () => {
+    Keyboard.dismiss();
+    const newErrors: {
+      name?: string;
+      email?: string;
+      password?: string;
+      cpassword?: string;
+    } = {};
+    let isValid = true;
+
     if (!name.trim()) {
-      Alert.alert('Validation Error', 'Please enter your full name.');
+      newErrors.name = 'Please enter your full name.';
+      isValid = false;
+    } else if (!email.trim()) {
+      newErrors.email = 'Email is required';
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = 'Please enter a valid email address';
+      isValid = false;
+    } else if (!password) {
+      newErrors.password = 'Password is required';
+      isValid = false;
+    } else if (password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+      isValid = false;
+    } else if (password.length >= 6 && password !== cpassword) {
+      newErrors.cpassword = 'Passwords do not match';
+      isValid = false;
+    } else if (!isTermsAccepted) {
+      isValid = false;
+      Alert.alert('Please accept the terms and conditions');
+    }
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  async function signUpWithEmail() {
+    if (!validateForm()) {
       return;
     }
-
-    // Validate email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      Alert.alert('Validation Error', 'Please enter a valid email address.');
-      return;
+    if (promoCode && promoCode.trim() !== '') {
+      setLoading(true);
+      setPromoCodeError('');
+      if (promoCode.length > 20) {
+        setPromoCodeError('Promo code is too long.');
+        setLoading(false);
+        return;
+      }
+      // Check if promo code exists in the database (case-insensitive)
+      const {data: promoCodeData, error: promoError} = await supabase
+        .from('promo-codes')
+        .select('promo_code')
+        .ilike('promo_code', promoCode.toLowerCase())
+        .maybeSingle();
+      // If there's an error or no data found
+      if (promoError || !promoCodeData) {
+        setLoading(false);
+        setPromoCodeError('Invalid promo code. Please check and try again.');
+        return;
+      }
     }
-
-    // Validate password
-    if (password.length < 8) {
-      Alert.alert(
-        'Validation Error',
-        'Password must be at least 8 characters long.',
-      );
-      return;
-    }
-
-    // Validate confirm password
-    if (password !== cpassword) {
-      Alert.alert('Validation Error', 'Passwords do not match.');
-      return;
-    }
-
-    // Optional: Validate promo code (if required)
-    if (promoCode && promoCode.length > 20) {
-      Alert.alert('Validation Error', 'Promo code is too long.');
-      return;
-    }
-
     setLoading(true);
-    // console.log('Starting SignUp ...');
-    await supabase.auth
-      .signUp({
-        email: email,
-        password: password,
-      })
-      .then(async response => {
-        const {user, session} = response.data;
+    try {
+      setLoading(true);
 
-        if (user) {
-          // console.log('Continue, user is valid');
-          if (pickedImage) {
-            // If an image is picked, upload it
-            await uploadProfileImage(user, session)
-              .then(async imageUrl => {
-                if (imageUrl) {
-                  // If image upload is successful, store user data
-                  const localUserData = {
-                    id: user.id,
-                    name: name,
-                    email: email,
-                    promo_code: promoCode,
-                    profile_photo: imageUrl, // Use the uploaded image URL
-                  };
-                  const {error: insertError} = await supabase
-                    .from('user_profiles')
-                    .insert([localUserData]);
+      const {data, error} = await supabase.auth.signUp({
+        email,
+        password,
+      });
 
-                  if (insertError) {
-                    Alert.alert('Error saving user data:', insertError.message);
-                  } else {
-                    // User data saved successfully
-                    session.localUserData = localUserData;
+      if (error) {
+        setErrors({email: error.message});
+        return;
+      }
 
-                    // console.log('localUserData found with image:', localUserData);
-                    dispatch(updateUser(session));
-                    // navigation.navigate('ChooseSubscriptionScreen', {
-                    //   returnToDashboard: false,
-                    // });
-                  }
-                } else {
-                  //if failed to upload image or retrieve image URL
-                  await storeUserDataWithoutImage(user, session);
-                }
-              })
-              .catch(async error => {
-                console.error('Error uploading profile image:', error);
-                // Alert.alert('Error uploading profile image:', error.message);
-                await storeUserDataWithoutImage(user, session);
-              });
+      const {user, session} = data;
+
+      if (!user) {
+        Alert.alert('Error', 'User creation failed');
+        return;
+      }
+
+      if (pickedImage) {
+        try {
+          const imageUrl = await uploadProfileImage(user, session);
+
+          if (imageUrl) {
+            const localUserData = {
+              id: user.id,
+              name,
+              email,
+              promo_code: promoCode,
+              profile_photo: imageUrl,
+            };
+
+            const {error: insertError} = await supabase
+              .from('user_profiles')
+              .insert([localUserData]);
+
+            if (insertError) {
+              Alert.alert('Error saving user data', insertError.message);
+              return;
+            }
+
+            session.localUserData = localUserData;
+            dispatch(updateUser(session));
+            // navigation.navigate('ChooseSubscriptionScreen', { returnToDashboard: false });
           } else {
-            // If no image is picked
             await storeUserDataWithoutImage(user, session);
           }
+        } catch (uploadErr) {
+          console.error('Error uploading profile image:', uploadErr);
+          await storeUserDataWithoutImage(user, session);
         }
-      })
-      .catch(error => {
-        console.error(error);
-        Alert.alert(error.message);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+      } else {
+        await storeUserDataWithoutImage(user, session);
+      }
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      Alert.alert('Unexpected error', err.message || 'Something went wrong');
+    } finally {
+      setLoading(false);
+    }
   }
 
   const uploadProfileImage = async (user, session) => {
@@ -402,48 +436,68 @@ const SignupScreen = ({navigation}: Props) => {
                   />
                 </View>
               </TouchableWithoutFeedback>
-
-              <AppInput
-                placeholder={'Full Name'}
-                onChangeText={name => Name(name)}
-                value={name}
-                keyboardType={'default'}
-                returnKeyType="next"
-                marginTop={2}
-                onSubmitEditing={() => emailInputRef.current?.focus()}
-              />
-
-              <AppInput
-                ref={emailInputRef}
-                placeholder={'Email'}
-                onChangeText={text => Email(text)}
-                value={email}
-                keyboardType={'email-address'}
-                returnKeyType="next"
-                onSubmitEditing={() => passwordIRef.current?.focus()}
-              />
-
-              <AppInput
-                ref={passwordIRef}
-                placeholder={'Password'}
-                onChangeText={text => Password(text)}
-                value={password}
-                keyboardType={'default'}
-                returnKeyType="next"
-                isPassword={true}
-                onSubmitEditing={() => cPasswordIRef.current?.focus()}
-              />
-
-              <AppInput
-                ref={cPasswordIRef}
-                placeholder={'Validate Password'}
-                onChangeText={text => cPassword(text)}
-                value={cpassword}
-                keyboardType={'default'}
-                returnKeyType="next"
-                isPassword={true}
-                onSubmitEditing={() => promoRef.current?.focus()}
-              />
+              <View style={{width: '100%'}}>
+                <AppInput
+                  placeholder={'Full Name'}
+                  onChangeText={name => Name(name)}
+                  value={name}
+                  keyboardType={'default'}
+                  returnKeyType="next"
+                  marginTop={2}
+                  onSubmitEditing={() => emailInputRef.current?.focus()}
+                  isError={errors.name}
+                />
+                {errors.name && (
+                  <Text style={styles.errorText}>{errors.name}</Text>
+                )}
+              </View>
+              <View style={{width: '100%'}}>
+                <AppInput
+                  ref={emailInputRef}
+                  placeholder={'Email'}
+                  onChangeText={text => Email(text)}
+                  value={email}
+                  keyboardType={'email-address'}
+                  returnKeyType="next"
+                  onSubmitEditing={() => passwordIRef.current?.focus()}
+                  isError={errors.email}
+                />
+                {errors.email && (
+                  <Text style={styles.errorText}>{errors.email}</Text>
+                )}
+              </View>
+              <View style={{width: '100%'}}>
+                <AppInput
+                  ref={passwordIRef}
+                  placeholder={'Password'}
+                  onChangeText={text => Password(text)}
+                  value={password}
+                  keyboardType={'default'}
+                  returnKeyType="next"
+                  isPassword={true}
+                  onSubmitEditing={() => cPasswordIRef.current?.focus()}
+                  isError={errors.password}
+                />
+                {errors.password && (
+                  <Text style={styles.errorText}>{errors.password}</Text>
+                )}
+              </View>
+              <View style={{width: '100%'}}>
+                <AppInput
+                  ref={cPasswordIRef}
+                  placeholder={'Validate Password'}
+                  onChangeText={text => cPassword(text)}
+                  value={cpassword}
+                  keyboardType={'default'}
+                  returnKeyType="next"
+                  isPassword={true}
+                  onSubmitEditing={() => promoRef.current?.focus()}
+                  isError={errors.cpassword}
+                />
+                {errors.cpassword && (
+                  <Text style={styles.errorText}>{errors.cpassword}</Text>
+                )}
+              </View>
 
               <Text
                 style={{
@@ -457,16 +511,27 @@ const SignupScreen = ({navigation}: Props) => {
                 }}>
                 {'Promo Code (Optional)'}
               </Text>
-
-              <AppInput
-                ref={promoRef}
-                placeholder=""
-                onChangeText={text => PromoCode(text)}
-                value={promoCode}
-                keyboardType={'default'}
-                returnKeyType="done"
-                onSubmitEditing={() => Keyboard.dismiss()}
-              />
+              <View style={{width: '100%'}}>
+                <AppInput
+                  ref={promoRef}
+                  value={promoCode}
+                  placeholder="Promo Code (Optional)"
+                  isError={promoCodeError}
+                  errorStyle={{color: 'red', fontSize: 12, marginTop: 5}}
+                  onChangeText={text => {
+                    setPromoCode(text);
+                    if (promoCodeError) {
+                      setPromoCodeError('');
+                    }
+                  }}
+                  keyboardType={'default'}
+                  returnKeyType="done"
+                  onSubmitEditing={() => Keyboard.dismiss()}
+                />
+                {promoCodeError && (
+                  <Text style={styles.errorText}>{promoCodeError}</Text>
+                )}
+              </View>
 
               {/* Privacy policy section */}
               <TouchableOpacity
@@ -521,13 +586,7 @@ const SignupScreen = ({navigation}: Props) => {
               </TouchableOpacity>
 
               <AppButton
-                onPress={() => {
-                  if (isTermsAccepted) {
-                    signUpWithEmail();
-                  } else {
-                    Alert.alert('Please accept the terms and conditions');
-                  }
-                }}
+                onPress={signUpWithEmail}
                 width={wp(85)}
                 height={50}
                 label={'Continue'}
@@ -544,7 +603,6 @@ const SignupScreen = ({navigation}: Props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
   },
   scrollContainer: {
     flexGrow: 1,
@@ -566,6 +624,12 @@ const styles = StyleSheet.create({
   loader: {
     position: 'absolute',
     zIndex: 1,
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginTop: 4,
+    alignSelf: 'flex-start',
   },
 });
 export default SignupScreen;
