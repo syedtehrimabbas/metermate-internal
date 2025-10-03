@@ -6,18 +6,19 @@
  */
 
 import React, {useEffect} from 'react';
-import {Platform, SafeAreaView, StatusBar, useColorScheme} from 'react-native';
+import {Platform, StatusBar, useColorScheme} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {Provider} from 'react-redux';
 import {store} from './src/redux';
 import {RootNavigation} from './src/navigation/RootNavigation';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import 'react-native-url-polyfill/auto';
-import {setup} from 'react-native-iap';
 import {
   flushFailedPurchasesCachedAsPendingAndroid,
   initConnection,
+  setup,
 } from 'react-native-iap';
+
 setup({storekitMode: 'STOREKIT2_MODE'});
 
 function App(): React.JSX.Element {

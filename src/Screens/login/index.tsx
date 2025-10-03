@@ -1,8 +1,9 @@
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Alert,
   Image,
   Keyboard,
+  Linking,
   StyleSheet,
   Text,
   TouchableWithoutFeedback,
@@ -37,6 +38,38 @@ const LoginScreen = ({navigation}: Props) => {
   const passwordIRef = useRef(null);
   const dispatch = useDispatch();
 
+  useEffect(() => {
+    const handleDeepLink = (event: {url: string}) => {
+      const url = event.url;
+      console.log('Deep link URL in LoginScreen:', url);
+
+      if (url && url.includes('reset-password')) {
+        const token = new URL(url).searchParams.get('token');
+        console.log('Token from deep link:', token);
+
+        // Navigate to ResetPasswordScreen with the token
+        navigation.navigate('ResetPasswordScreen', {token});
+      }
+    };
+
+    // Listen for incoming links
+    const subscription = Linking.addEventListener('url', handleDeepLink);
+
+    // Check if app was opened from a deep link
+    const processInitialURL = async () => {
+      const initialUrl = await Linking.getInitialURL();
+      if (initialUrl) {
+        console.log('App opened from URL in LoginScreen:', initialUrl);
+        handleDeepLink({url: initialUrl});
+      }
+    };
+
+    processInitialURL();
+
+    return () => {
+      subscription.remove();
+    };
+  }, [navigation]);
   const validateForm = () => {
     Keyboard.dismiss();
     const newErrors: {email?: string; password?: string} = {};

@@ -35,10 +35,10 @@ type Props = {
   navigation: any;
 };
 const SignupScreen = ({navigation}: Props) => {
-  const [email, Email] = useState('hello@gmail.com');
-  const [name, Name] = useState('Tehrim');
-  const [password, Password] = useState('Hello879@');
-  const [cpassword, cPassword] = useState('Hello879@');
+  const [email, Email] = useState('');
+  const [name, Name] = useState('');
+  const [password, Password] = useState('');
+  const [cpassword, cPassword] = useState('');
   const [promoCode, setPromoCode] = useState<string | undefined>('');
   const [promoCodeError, setPromoCodeError] = useState<string>('');
   const [isTermsAccepted, acceptTerms] = useState(false);

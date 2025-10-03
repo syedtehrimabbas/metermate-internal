@@ -2,12 +2,32 @@ import React, {useEffect, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {AppStack, AuthenticationStack, SplashStack} from '..';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {headerOptions, navigatorOptions} from '../config';
 import MeterMateEncryptedStorage from '../../LocalStorage';
 import {updateUser} from '../../redux';
-import {useDispatch} from 'react-redux';
 
+type RootStackParamList = {
+  ResetPasswordScreen: {token?: string};
+  // other screen params
+};
+
+const linking = {
+  prefixes: ['metermate://', 'https://metermate.co'],
+  config: {
+    screens: {
+      ResetPasswordScreen: {
+        path: 'reset-password',
+        parse: {
+          token: (token: string) => token,
+        },
+        stringify: {
+          token: (token: string) => token,
+        },
+      },
+    },
+  },
+};
 type Props = {};
 const RootNav = createNativeStackNavigator();
 const RootNavigation = (props: Props) => {
@@ -21,24 +41,25 @@ const RootNavigation = (props: Props) => {
 
   React.useEffect(() => {
     MeterMateEncryptedStorage.getItem(MeterMateEncryptedStorage.USER_KEY)
-        .then(user => {
-          if (user) {
-            setUserDetails(user);
-            dispatch(updateUser(user));
-          } else {
-            console.log('No user data found.');
-          }
-        })
-        .catch(error => {
-          console.error('Error retrieving user data:', error);
-        });
+      .then(user => {
+        if (user) {
+          setUserDetails(user);
+          dispatch(updateUser(user));
+        } else {
+          console.log('No user data found.');
+        }
+      })
+      .catch(error => {
+        console.error('Error retrieving user data:', error);
+      });
     setTimeout(() => {
       setSplash(false);
     }, 3000);
   }, []);
 
   return (
-    <NavigationContainer>
+    <NavigationContainer
+      linking={linking}>
       <RootNav.Navigator screenOptions={navigatorOptions}>
         {Object.entries({
           ...(isSplash

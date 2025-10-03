@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Image,
   Keyboard,
@@ -11,7 +11,7 @@ import colors from '../../theme/colors';
 import {AppFonts} from '../../fonts';
 import {AppImages} from '../../images';
 import {AppInput} from '../../components/AppInput.js';
-import {getScaledHeight, scaledFontWidth} from '../../utils/AppUtils.js';
+import {scaledFontWidth} from '../../utils/AppUtils.js';
 import {AppButton} from '../../components/AppButton.js';
 import {wp} from '../../utils/Dimension.js';
 import {supabase} from '../../utils/supabase.ts';
@@ -27,10 +27,27 @@ const ForgotPasswordScreen = ({navigation}: Props) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  useEffect(() => {
+    // Listen for auth state changes
+    const {
+      data: {subscription},
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        // Navigate to the reset password screen
+          console.log('Received PASSWORD_RECOVERY');
+          console.log(session);
+        navigation.navigate('ResetPasswordScreen');
+      }
+    });
 
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, []);
+  // In your ForgotPasswordScreen component
   const handleResetPassword = async () => {
     Keyboard.dismiss();
-    
+
     if (!email.trim()) {
       setError('Email is required');
       return;
@@ -44,16 +61,18 @@ const ForgotPasswordScreen = ({navigation}: Props) => {
     setSuccessMessage('');
 
     try {
-      // Use your website URL that will handle the redirect to the app
-      const redirectUrl = 'https://metermate.co/reset-password';
-      const { data, error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: redirectUrl,
+      const {error} = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: 'metermate://reset-password',
       });
 
-      if (resetError) {
-        setError(resetError.message || 'Failed to send reset email. Please try again.');
+      if (error) {
+        setError(
+          error.message || 'Failed to send reset email. Please try again.',
+        );
       } else {
-        setSuccessMessage('Password reset email sent! Please check your inbox and follow the instructions.');
+        setSuccessMessage(
+          'Password reset email sent! Please check your inbox and follow the instructions.',
+        );
       }
     } catch (e) {
       setError('An unexpected error occurred. Please try again.');
@@ -75,7 +94,8 @@ const ForgotPasswordScreen = ({navigation}: Props) => {
               />
               <Text style={styles.title}>Reset Your Password</Text>
               <Text style={styles.subtitle}>
-                Enter your email and we'll send you a link to reset your password.
+                Enter your email and we'll send you a link to reset your
+                password.
               </Text>
 
               <View style={{width: '100%'}}>
